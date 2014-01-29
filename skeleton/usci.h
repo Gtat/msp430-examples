@@ -22,3 +22,4 @@ int usci_setup
    int rateDivider, int mask);
 
 #endif
+

@@ -76,7 +76,7 @@ $(TARGET).elf: $(OBJECTS)
 .PHONY:	clean
 clean:
 	-$(RM) $(OBJECTS)
-	-$(RM) $(TARGET).*
+#	-$(RM) $(TARGET).*
 	-$(RM) $(SOURCES:.c=.lst)
 	-$(RM) $(DEPEND)
 
