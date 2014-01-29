@@ -23,14 +23,6 @@
 #define RING_QUEUE_CREATE(type, elem_ct, name) \
   RING_QUEUE_DECLARE(type, elem_ct) name = RING_QUEUE_INIT(elem_ct)
 
-/*#define RING_QUEUE_INIT(q)     \
-  ({                           \
-    q.depth  = (sizeof(q.data)/sizeof(q.data[0])); \
-    q.head   = q.tail = 0;     \
-    q.length = 0;              \
-    q;                         \
-  }) 
-*/
 #define RING_QUEUE_PUSH_ALWAYS(q, elem)          \
   do                                             \
   {                                              \

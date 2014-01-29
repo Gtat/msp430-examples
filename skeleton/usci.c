@@ -1,4 +1,11 @@
-/* usci.c -- setup for TI's Universal Serial Communication Interface
+/**
+ * @file    usci.c
+ * @author  Sam Boling
+ * @version 0.1
+ *
+ * @section DESCRIPTION
+ *
+ * Setup for TI's Universal Serial Communication Interface.
  *
  * The USCI is a subsystem on the microcontroller for managing several
  * kinds of serial interfaces. The ones of interest to the iEGAS are
@@ -11,6 +18,17 @@
 
 #include "usci.h"
 
+/**
+ * Set up the universal serial communication interface (USCI) as
+ * an RS232 or SPI link.
+ *
+ * @param channel     Either USCI_CHANNEL_A0 or USCI_CHANNEL_B0.
+ * @param mode        Either USCI_MODE_RS232 or USCI_MODE_SPI.
+ * @param rateDivider The division factor against the master clock.
+ * @param mask        The bits to set in interrupt register IE2.
+ *
+ * @return        Zero on success.
+ */
 int usci_setup
   (enum usci_channel channel, enum usci_mode mode, 
    int rateDivider, int mask)

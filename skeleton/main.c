@@ -1,4 +1,11 @@
-/* MSP430 interrupt-driven low-power operation skeleton/example
+/**
+ * @file    main.c
+ * @author  Sam Boling <charles.samuel.boling@gmail.com>
+ * @version 0.1
+ *
+ * @section DESCRIPTION
+ *
+ * MSP430 interrupt-driven low-power operation skeleton/example
  *
  * This program sets up interrupts for:
  *   1) when a byte is received over the RS232/serial/USB connection 
@@ -20,8 +27,6 @@
  *
  * Therefore any characters typed into a terminal connected to the running 
  * program should be echoed back a short time later with their case reversed.
- *
- * Sam Boling, 1/29/2014
  */
 
 #include <msp430.h>
@@ -30,6 +35,11 @@
 #include "ringq.h"
 #include "usci.h"
 
+
+
+/**
+ * General purpose setup to get the board running.
+ */
 void setup
   (void)
 {
@@ -42,14 +52,24 @@ void setup
   DCOCTL  = CALDCO_1MHZ;
 }
 
+/**
+ * Set up the watchdog as an interval timer interrupt.
+ */
 void timer_setup
-  ()
+  (void)
 {
-  WDTCTL = WDT_ADLY_16; /* interrupt every ~16 ms */
+  WDTCTL  =  WDT_ADLY_16; /* interrupt every ~16 ms */
   IE1    &= ~NMIIE;
   IE1    |=  WDTIE;
 }
 
+/**
+ * Write 1 or 0 bytes to the terminal.
+ *
+ * @param c The byte to write as an integer.
+ *
+ * @return  The number of bytes written.
+ */
 int putchar
   (int c)
 {

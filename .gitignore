@@ -7,3 +7,5 @@ Release/
 *.hex
 *.map
 *.text
+
+*.zip
