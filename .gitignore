@@ -1,2 +1,9 @@
 Debug/
 Release/
+
+*~
+*.o
+*.elf
+*.hex
+*.map
+*.text
