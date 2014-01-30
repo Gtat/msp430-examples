@@ -1,6 +1,6 @@
 /**
  * @file    usci.c
- * @author  Sam Boling
+ * @author  Sam Boling <charles.samuel.boling@gmail.com>
  * @version 0.1
  *
  * @section DESCRIPTION

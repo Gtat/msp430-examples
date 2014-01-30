@@ -1,3 +1,14 @@
+/**
+ * @file    ringq.h
+ * @author  Sam Boling <charles.samuel.boling@gmail.com>
+ * @version 0.1
+ *
+ * @section DESCRIPTION
+ * 
+ * Macros to generically define a ring queue/circular buffer/FIFO structure
+ * at compile time. POP() routines employ GCC statement expressions, 
+ * supported also by the TI compiler suite.
+ */
 #ifndef __RINGQ_H_GUARD
 #define __RINGQ_H_GUARD
 

@@ -1,3 +1,11 @@
+/**
+ * @file    usci.h
+ * @author  Sam Boling <charles.samuel.boling@gmail.com>
+ * @version 0.1
+ *
+ * Macros, types and function prototypes for the Universal Serial 
+ * Communication Interface (USCI).
+ */
 #ifndef __USCI_H_GUARD
 #define __USCI_H_GUARD
 
