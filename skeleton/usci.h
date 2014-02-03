@@ -29,5 +29,5 @@ int usci_setup
   (enum usci_channel channel, enum usci_mode mode, 
    int rateDivider, int mask);
 
-#endif
+#endif /* __USCI_H_GUARD */
 

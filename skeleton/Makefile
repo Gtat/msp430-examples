@@ -12,9 +12,9 @@ TARGET     = skeleton
 MCU        = msp430g2553
 #    # List all the source files here
 # eg if you have a source file foo.c then list it here
-SOURCES = main.c usci.c
+SOURCES = main.c usci.c ringq.h usci.h
 #   # Include are located in the Include directory
-INCLUDES = -IInclude
+INCLUDES = -Iinclude
 # Add or subtract whatever MSPGCC flags you want. There are plenty more
 ###############################################################################
 CFLAGS   = -mmcu=$(MCU) -g -Os -Wall -Wunused $(INCLUDES)   
