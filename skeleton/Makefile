@@ -17,7 +17,7 @@ SOURCES = main.c usci.c ringq.h usci.h
 INCLUDES = -Iinclude
 # Add or subtract whatever MSPGCC flags you want. There are plenty more
 ###############################################################################
-CFLAGS   = -mmcu=$(MCU) -g -Os -Wall -Wunused $(INCLUDES)   
+CFLAGS   = -mmcu=$(MCU) -g -O2 -Wall -Wunused $(INCLUDES)   
 ASFLAGS  = -mmcu=$(MCU) -x assembler-with-cpp -Wa,-gstabs
 LDFLAGS  = -mmcu=$(MCU) -Wl,-Map=$(TARGET).map
 ###############################################################################
@@ -41,7 +41,7 @@ MV       = mv
 #  DEPEND = $(SOURCES:.c=.d)
 #   # all the object files
 OBJECTS = $(SOURCES:.c=.o)
-all: $(TARGET).elf $(TARGET).hex $(TARGET).text 
+all: $(TARGET).elf $(TARGET).hex $(TARGET).text Makefile
 $(TARGET).elf: $(OBJECTS)
 	echo "Linking $@"
 	$(CC) $(OBJECTS) $(LDFLAGS) $(LIBS) -o $@

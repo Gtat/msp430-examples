@@ -40,7 +40,7 @@
 /**
  * General purpose setup to get the board running.
  */
-void setup
+__inline void setup
   (void)
 {
   WDTCTL = WDTPW | WDTHOLD; /* stop watchdog */
@@ -55,7 +55,7 @@ void setup
 /**
  * Set up the watchdog as an interval timer interrupt.
  */
-void timer_setup
+__inline void timer_setup
   (void)
 {
   WDTCTL  =  WDT_ADLY_16; /* interrupt every ~16 ms */
@@ -101,6 +101,15 @@ int main
   timer_setup();
 
   P1DIR |= 0x01;                               /* set LED pin as output */
+ 
+  /* print a smiley face as "hello world" */
+  putchar('\r');
+  putchar('\n');
+  putchar(':');
+  putchar('-');
+  putchar(')');
+  putchar('\r');
+  putchar('\n');
 
   while (1)
   {
@@ -122,7 +131,7 @@ __interrupt void USCI_rx_isr
   (void)
 {
   /* at each received keystroke: */
-  P1OUT ^= 0x01;                              /* blink the LED */
+//  P1OUT ^= 0x01;                              /* blink the LED */
   RING_QUEUE_PUSH(stringq, UCA0RXBUF ^ 0x20); /* change upper <-> lower case */
                                               /* of received character and   */
                                               /* put it in a fifo            */
@@ -132,6 +141,7 @@ __interrupt void USCI_rx_isr
 __interrupt void WDT_isr
   (void)
 {
+  P1OUT ^= 0x01;
   if (!RING_QUEUE_EMPTY(stringq))
   {
     __bic_SR_register_on_exit(LPM0_bits);     /* exit low power mode 0 */
