@@ -33,6 +33,7 @@
 #include <stdio.h>
 
 #include "ringq.h"
+#include "protocol.h"
 #include "drivers/usci.h"
 
 
@@ -73,16 +74,9 @@ __inline void timer_setup
 int putchar
   (int c)
 {
-  if (c)
-  {
     while(UCA0STAT & UCBUSY);  /* wait until USCI channel A is not busy */
     UCA0TXBUF = c;             /* write given character to output register */
     return 1;                  /* wrote one byte */
-  } 
-  else
-  {
-    return 0;                  /* don't write \0, the null terminator */
-  }
 }
 
 /* declare and initialize a ring queue AKA circular buffer AKA fifo */
@@ -90,9 +84,35 @@ int putchar
 /* declare it globally so it is shared between main and interrupt */
 RING_QUEUE_CREATE(char, 16, stringq);
 
+union mcu_command mcu_cmd =
+  {
+    .command = 
+      { 
+        .id = OK,
+        .payload = 
+          {
+            .alert = 
+              {
+                .severity  = WARNING,
+                .type      = TOXIC,
+                .channel   = 5,
+
+                .timestamp = 0x1234,
+                .data      = {'\xC0', '\xFF', '\xEE',},
+              },
+          }, 
+        .crc = 0x00,
+      },
+  }; 
+
+
+union pc_command  pc_cmd;
+
 int main
   (void)
 {
+  int i;
+
   setup();                                     /* system setup */
   usci_setup(USCI_CHANNEL_A0, USCI_MODE_RS232, /* channel A, serial/RS232 mode */
              1000000/9600,                     /* 9600 baud using 1 MHz ref clock */
@@ -102,26 +122,25 @@ int main
 
   P1DIR |= 0x01;                               /* set LED pin as output */
  
-  /* print a smiley face as "hello world" */
-  putchar('\r');
-  putchar('\n');
-  putchar(':');
-  putchar('-');
-  putchar(')');
-  putchar('\r');
-  putchar('\n');
 
-  while (1)
+  for (i=0; i < sizeof(mcu_cmd); i++)
   {
+    putchar(mcu_cmd.bytes[i]);
+  }
+  putchar('0' + i);
+
+  while(1);
+
+  //while (1)
+//  {
     __bis_SR_register(LPM0_bits | GIE);       /* enter low power mode 0 */
                                               /* with interrupts on */
-  
     /* flush the buffer */
-    while (!RING_QUEUE_EMPTY(stringq))
-    {  
-      putchar(RING_QUEUE_POP(stringq));
-    }
-  }
+//    while (!RING_QUEUE_EMPTY(stringq))
+  //  {  
+    //  putchar(RING_QUEUE_POP(stringq));
+//    }
+//  }
 
   return 0;
 }
@@ -134,6 +153,7 @@ __interrupt void USCI_rx_isr
   RING_QUEUE_PUSH(stringq, UCA0RXBUF); /* change upper <-> lower case */
                                               /* of received character and   */
                                               /* put it in a fifo            */
+//  __bic_SR_register_on_exit(LPM0_bits);
 }
 
 #pragma vector=WDT_VECTOR
@@ -141,9 +161,10 @@ __interrupt void WDT_isr
   (void)
 {
   P1OUT ^= 0x01;
-  if (!RING_QUEUE_EMPTY(stringq))
-  {
-    __bic_SR_register_on_exit(LPM0_bits);     /* exit low power mode 0 */
-  } 
+  putchar('!');
+  //if (!RING_QUEUE_EMPTY(stringq))
+//  {
+//    __bic_SR_register_on_exit(LPM0_bits);     /* exit low power mode 0 */
+//  } 
 }
 

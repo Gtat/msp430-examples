@@ -23,10 +23,10 @@
 #define RING_QUEUE_DECLARE(type, elem_ct) \
   struct                                  \
   {                                       \
-    type          data[elem_ct];          \
-    uint8_t       head,   tail;           \
-    uint8_t       length;                 \
-    const uint8_t depth;                  \
+    type             data[elem_ct];       \
+    uint8_t          head,   tail;        \
+    volatile uint8_t length;              \
+    const uint8_t    depth;               \
   } 
 
 /** \def RING_QUEUE_INIT(elem_ct)
