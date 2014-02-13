@@ -38,32 +38,52 @@ int usci_setup
   {
     case USCI_CHANNEL_A0:
     {
-      UCA0CTL1 |=  UCSSEL_2;    /* use master clock (1 MHz)            */
+      UCA0CTL1 |=  UCSSEL_2;     /* use master clock (1 MHz)            */
 
-      UCA0BR0   =  rateDivider; /* refer to 19.3.11 in the User Guide, */
-      UCA0BR1   =  0;           /* or use the BAUDRATE macro in usci.h */
-                                /* for a rough figure                  */
+      UCA0BR0   =  rateDivider;  /* refer to 19.3.11 in the User Guide, */
+      UCA0BR1   =  0;            /* or use the BAUDRATE macro in usci.h */
+                                 /* for a rough figure                  */
+      P1SEL     =  BIT1 | BIT2;  /* set port 1 bits 1 and 2 to peripheral mode*/
+      P1SEL2    =  BIT1 | BIT2; 
       if (mode == USCI_MODE_RS232)
       {
-        UCA0MCTL  =  UCBRS0;    /* RS232 modulation pattern, UG 19-30 */
+        UCA0MCTL  =  UCBRS0;     /* RS232 modulation pattern, UG 19-30 */
       }
-      UCA0CTL1 &= ~UCSWRST;     /* de-assert USCI reset for channel   */
+      else  /* SPI mode */
+      {
+        /* 3-pin, 8-bit SPI master, capture on falling edge */
+        UCA0CTL0 |= UCMSB | UCMST | UCSYNC; 
+        UCA0MCTL  = 0;
+
+        /* for SPI on channel A, pin 4 functions as the clock */
+        P1SEL    |= BIT4;
+        P1SEL2   |= BIT4;
+      }
+      UCA0CTL1 &= ~UCSWRST;      /* de-assert USCI reset for channel   */
       break;
     }
     case USCI_CHANNEL_B0:
     {
-      UCB0CTL1 |=  UCSSEL_2;    /* use master clock (1 MHz)            */
+      UCB0CTL1 |=  UCSSEL_2;     /* use master clock (1 MHz)            */
 
-      UCB0BR0   =  rateDivider; /* refer to 19.3.11 in the User Guide, */
-      UCB0BR1   =  0;           /* or use the BAUDRATE macro in usci.h */
-                                /* for a rough figure                  */
-      UCB0CTL1 &= ~UCSWRST;     /* de-assert USCI reset for channel   */
+      UCB0BR0   =  rateDivider;  /* refer to 19.3.11 in the User Guide, */
+      UCB0BR1   =  0;            /* or use the BAUDRATE macro in usci.h */
+                                 /* for a rough figure                  */
+      P1SEL     =  BIT6 | BIT7;  /* set port 1 bits 6 and 7 to peripheral mode*/
+      P1SEL2    =  BIT6 | BIT7; 
+      if (mode == USCI_MODE_SPI) /* SPI mode */
+      {
+        /* 3-pin, 8-bit SPI master, capture on falling edge */
+        UCB0CTL0 |= UCMSB | UCMST | UCSYNC; 
+
+        /* for SPI on channel B, pin 5 functions as the clock */
+        P1SEL    |= BIT5;
+        P1SEL2   |= BIT5;
+      }
+      UCB0CTL1 &= ~UCSWRST;      /* de-assert USCI reset for channel   */
       break;
     }
   }
-
-  P1SEL     =  BIT1 | BIT2; /* set port 1 bits 1 and 2 to peripheral mode*/
-  P1SEL2    =  BIT1 | BIT2; 
 
   IE2      |=  mask;        /* activate specified interrupts */
 
