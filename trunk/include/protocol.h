@@ -1,11 +1,11 @@
-/** @file    command.h
+/** @file    protocol.h
  *  @author  Sam Boling <charles.samuel.boling@gmail.com>
  *  @version 0.1
  *
  *  Explicit definition of iEGAS command formats. 
  */
-#ifndef __COMMAND_H_GUARD
-#define __COMMAND_H_GUARD
+#ifndef __PROTOCOL_H_GUARD
+#define __PROTOCOL_H_GUARD
 
 #include <stdint.h>
 
@@ -40,5 +40,5 @@ union mcu_command
   char raw_bytes[sizeof(command)];
 };
 
-#endif /* __COMMAND_H_GUARD */
+#endif /* __PROTOCOL_H_GUARD */
 

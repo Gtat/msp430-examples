@@ -12,7 +12,9 @@ TARGET     = skeleton
 MCU        = msp430g2553
 #    # List all the source files here
 # eg if you have a source file foo.c then list it here
-SOURCES = main.c usci.c ringq.h usci.h
+SOURCES  = main.c usci.c
+VPATH    = src/drivers:src
+BUILDDIR = build/
 #   # Include are located in the Include directory
 INCLUDES = -Iinclude
 # Add or subtract whatever MSPGCC flags you want. There are plenty more
@@ -41,7 +43,7 @@ MV       = mv
 #  DEPEND = $(SOURCES:.c=.d)
 #   # all the object files
 OBJECTS = $(SOURCES:.c=.o)
-all: $(TARGET).elf $(TARGET).hex $(TARGET).text Makefile
+all: $(TARGET).elf $(TARGET).hex $(TARGET).text Makefile clean
 $(TARGET).elf: $(OBJECTS)
 	echo "Linking $@"
 	$(CC) $(OBJECTS) $(LDFLAGS) $(LIBS) -o $@
@@ -56,23 +58,20 @@ $(TARGET).elf: $(OBJECTS)
 	unix2dos $(TARGET).text
 #  The above line is required for the DOS based TI BSL tool to be able to read 
 #  the txt file generated from linux/unix systems.
-#   %.o: %.c
-#    	echo "Compiling $<"
-#    	 	$(CC) -c $(CFLAGS) -o $@ $<
-#    	 	 # rule for making assembler source listing, to see the code
+$(BUILDDIR)/%.o: %.c
+	$(CC) -c $(CFLAGS) -o $@ $<
+
 %.lst: %.c
 	$(CC) -c $(ASFLAGS) -Wa,-anlhd $< > $@
+
 # include the dependencies unless we're going to clean, then forget about them.
-#  ifneq ($(MAKECMDGOALS), clean)
-#   -include $(DEPEND)
-#    endif
-#     # dependencies file
-# includes also considered, since some of these are our own
-#  # (otherwise use -MM instead of -M)
+ifneq ($(MAKECMDGOALS), clean)
+	-include $(DEPEND)
+endif
 %.d: %.c
 	echo "Generating dependencies $@ from $<"
 	$(CC) -M ${CFLAGS} $< >$@
-.SILENT:
+
 .PHONY:	clean
 clean:
 	-$(RM) $(OBJECTS)
