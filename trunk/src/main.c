@@ -131,8 +131,7 @@ __interrupt void USCI_rx_isr
   (void)
 {
   /* at each received keystroke: */
-//  P1OUT ^= 0x01;                              /* blink the LED */
-  RING_QUEUE_PUSH(stringq, UCA0RXBUF ^ 0x20); /* change upper <-> lower case */
+  RING_QUEUE_PUSH(stringq, UCA0RXBUF); /* change upper <-> lower case */
                                               /* of received character and   */
                                               /* put it in a fifo            */
 }

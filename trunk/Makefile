@@ -45,17 +45,15 @@ MV       = mv
 OBJECTS = $(SOURCES:.c=.o)
 all: $(TARGET).elf $(TARGET).hex $(TARGET).text Makefile clean
 $(TARGET).elf: $(OBJECTS)
-	echo "Linking $@"
+	echo
 	$(CC) $(OBJECTS) $(LDFLAGS) $(LIBS) -o $@
-	echo
-	echo ">>>> Size of Firmware <<<<"
 	$(SIZE) $(TARGET).elf
-	echo
+
 %.hex: %.elf
-	$(OBJCOPY) -O ihex $< $@
+	@$(OBJCOPY) -O ihex $< $@
 %.text: %.hex
-	$(MAKETXT) -O $@ -TITXT $< -I
-	unix2dos $(TARGET).text
+	@$(MAKETXT) -O $@ -TITXT $< -I
+	@unix2dos $(TARGET).text
 #  The above line is required for the DOS based TI BSL tool to be able to read 
 #  the txt file generated from linux/unix systems.
 $(BUILDDIR)/%.o: %.c
@@ -69,13 +67,12 @@ ifneq ($(MAKECMDGOALS), clean)
 	-include $(DEPEND)
 endif
 %.d: %.c
-	echo "Generating dependencies $@ from $<"
 	$(CC) -M ${CFLAGS} $< >$@
 
 .PHONY:	clean
 clean:
-	-$(RM) $(OBJECTS)
-#	-$(RM) $(TARGET).*
-	-$(RM) $(SOURCES:.c=.lst)
-	-$(RM) $(DEPEND)
+	@$(RM) $(OBJECTS)
+#	@$(RM) $(TARGET).*
+	@$(RM) $(SOURCES:.c=.lst)
+	@$(RM) $(DEPEND)
 
