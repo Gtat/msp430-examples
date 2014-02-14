@@ -6,8 +6,8 @@
  * Macros, types and function prototypes for the Universal Serial 
  * Communication Interface (USCI).
  */
-#ifndef __USCI_H_GUARD
-#define __USCI_H_GUARD
+#ifndef __DRIVERS_USCI_H_GUARD
+#define __DRIVERS_USCI_H_GUARD
 
 #include <msp430.h>
 
@@ -29,5 +29,5 @@ int usci_setup
   (enum usci_channel channel, enum usci_mode mode, 
    int rateDivider, int mask);
 
-#endif /* __USCI_H_GUARD */
+#endif /* __DRIVERS_USCI_H_GUARD */
 

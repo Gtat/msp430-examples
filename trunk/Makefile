@@ -1,7 +1,7 @@
 TARGET     = iegas
 MCU        = msp430g2553
 
-SOURCES  = main.c usci.c
+SOURCES  = main.c usci.c 
 VPATH    = src/drivers:src
 BUILDDIR = build/
 INCLUDES = -Iinclude

@@ -34,35 +34,15 @@
 
 #include "ringq.h"
 #include "protocol.h"
+
 #include "drivers/usci.h"
 
+#include "drivers/inlines.c"
 
-
-/**
- * General purpose setup to get the board running.
- */
-__inline void setup
-  (void)
-{
-  WDTCTL = WDTPW | WDTHOLD; /* stop watchdog */
-  if (CALBC1_1MHZ == 0xFF)
-  {
-    while(1);               /* trap CPU if clock is not calibrated */
-  } 
-  BCSCTL1 = CALBC1_1MHZ;
-  DCOCTL  = CALDCO_1MHZ;
-}
-
-/**
- * Set up the watchdog as an interval timer interrupt.
- */
-__inline void timer_setup
-  (void)
-{
-  WDTCTL  =  WDT_ADLY_16; /* interrupt every ~16 ms */
-  IE1    &= ~NMIIE;
-  IE1    |=  WDTIE;
-}
+/* declare and initialize a ring queue AKA circular buffer AKA fifo */
+/* data type is char, depth is 16 elements, identifier is "stringq" */
+/* declare it globally so it is shared between main and interrupt */
+RING_QUEUE_CREATE(char, 16, incoming_q);
 
 /**
  * Write 1 or 0 bytes to the terminal.
@@ -79,13 +59,9 @@ int putchar
     return 1;                  /* wrote one byte */
 }
 
-/* declare and initialize a ring queue AKA circular buffer AKA fifo */
-/* data type is char, depth is 16 elements, identifier is "stringq" */
-/* declare it globally so it is shared between main and interrupt */
-RING_QUEUE_CREATE(char, 16, stringq);
 
-union mcu_command mcu_cmd =
-  {
+union mcu_command mcu_cmd;
+/*  = {
     .command = 
       { 
         .id = OK,
@@ -104,67 +80,36 @@ union mcu_command mcu_cmd =
         .crc = 0x00,
       },
   }; 
-
+*/
 
 union pc_command  pc_cmd;
 
 int main
   (void)
 {
-  int i;
-
   setup();                                     /* system setup */
   usci_setup(USCI_CHANNEL_A0, USCI_MODE_RS232, /* channel A, serial/RS232 mode */
              1000000/9600,                     /* 9600 baud using 1 MHz ref clock */
              UCA0RXIE);                        /* receive interrupts enabled */
-                    
-  timer_setup();
+
+
+//  timer_setup();
+  adc_setup(1, 1);
+
 
   P1DIR |= 0x01;                               /* set LED pin as output */
- 
 
-  for (i=0; i < sizeof(mcu_cmd); i++)
-  {
-    putchar(mcu_cmd.bytes[i]);
-  }
-  putchar('0' + i);
-
-  while(1);
-
-  //while (1)
+//  while(1)
 //  {
     __bis_SR_register(LPM0_bits | GIE);       /* enter low power mode 0 */
                                               /* with interrupts on */
-    /* flush the buffer */
-//    while (!RING_QUEUE_EMPTY(stringq))
-  //  {  
-    //  putchar(RING_QUEUE_POP(stringq));
+//    while (incoming_q.length >= sizeof(union pc_command))
+//    {
+//      RING_QUEUE_POP_MANY(incoming_q, pc_cmd.bytes, sizeof(union pc_command));
 //    }
 //  }
-
   return 0;
 }
 
-#pragma vector=USCIAB0RX_VECTOR
-__interrupt void USCI_rx_isr
-  (void)
-{
-  /* at each received keystroke: */
-  RING_QUEUE_PUSH(stringq, UCA0RXBUF); /* change upper <-> lower case */
-                                              /* of received character and   */
-                                              /* put it in a fifo            */
-//  __bic_SR_register_on_exit(LPM0_bits);
-}
-
-#pragma vector=WDT_VECTOR
-__interrupt void WDT_isr
-  (void)
-{
-  P1OUT ^= 0x01;
-  putchar('!');
-  //if (!RING_QUEUE_EMPTY(stringq))
-//  {
-//    __bic_SR_register_on_exit(LPM0_bits);     /* exit low power mode 0 */
-//  } 
-}
+#include "interrupt.c"
 

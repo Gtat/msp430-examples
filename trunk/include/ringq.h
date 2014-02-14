@@ -53,6 +53,29 @@
 #define RING_QUEUE_CREATE(type, elem_ct, name) \
   RING_QUEUE_DECLARE(type, elem_ct) name = RING_QUEUE_INIT(elem_ct)
 
+/** \def RING_QUEUE_EMPTY(q)
+ *  Check if the given FIFO is empty.
+ *
+ *  @param  q  The FIFO to examine.
+ *  @retval 0  The queue is not empty.
+ *  @retval 1  The queue is empty.
+ */
+#define RING_QUEUE_EMPTY(q) \
+  (!q.length)
+
+/** \def RING_QUEUE_FULL(q)
+ *  Check if the given FIFO is full.
+ *
+ *  @param  q  The FIFO to examine.
+ *  @retval 0  The queue is not full.
+ *  @retval 1  The queue is full.
+ */
+#define RING_QUEUE_NOT_FULL(q) \
+  (q.length < q.depth)
+
+#define RING_QUEUE_FULL(q) \
+  (!RING_QUEUE_NOT_FULL(q))
+
 /** \def RING_QUEUE_PUSH_ALWAYS(q, elem)
  *  Add an element to the given FIFO. Don't check the length -- overwrite
  *  old elements if the buffer is full.
@@ -77,7 +100,7 @@
 #define RING_QUEUE_PUSH(q, elem)       \
   do                                   \
   {                                    \
-    if (q.length < q.depth)            \
+    if (!RING_QUEUE_FULL(q))           \
     {                                  \
       RING_QUEUE_PUSH_ALWAYS(q, elem); \
       q.length++;                      \
@@ -110,7 +133,7 @@
   ({                                  \
     __typeof__(q.data[0]) ret;        \
     ret = 0;                          \
-    if (q.length > 0)                 \
+    if (!RING_QUEUE_EMPTY(q))                 \
     {                                 \
       q.length--;                     \
       ret = RING_QUEUE_POP_ALWAYS(q); \
@@ -118,25 +141,24 @@
     ret;                              \
   })
 
-/** \def RING_QUEUE_EMPTY(q)
- *  Check if the given FIFO is empty.
- *
- *  @param  q  The FIFO to examine.
- *  @retval 0  The queue is not empty.
- *  @retval 1  The queue is empty.
- */
-#define RING_QUEUE_EMPTY(q) \
-  (!q.length)
+#define RING_QUEUE_POP_MANY(q, dest, count)  \
+  ({                                         \
+    size_t i, limit;                         \
+    __typeof(q.data[0]) *p;                  \
+                                             \
+    p     = (dest);                          \
+    limit = (count);                         \
+                                             \
+    for (i=0; /* side effects only once */   \
+         i < limit && !RING_QUEUE_EMPTY(q);  \
+         i++)                                \
+    {                                        \
+      *p++ = RING_QUEUE_POP_ALWAYS(q);       \
+      q.length--;                            \
+    }                                        \
+    i;                                       \
+  })
 
-/** \def RING_QUEUE_FULL(q)
- *  Check if the given FIFO is full.
- *
- *  @param  q  The FIFO to examine.
- *  @retval 0  The queue is not full.
- *  @retval 1  The queue is full.
- */
-#define RING_QUEUE_FULL(q) \
-  (q.length == q.depth)
 
 #endif /* __RINGQ_H_GUARD */
 
