@@ -14,9 +14,9 @@
 #define __PROTOCOL_H_GUARD
 
 #include <stdint.h>
+#include "global.h"
 
 #define __PACK __attribute__((packed))
-#define NUM_SIGNAL_CHS 6
 
 /** \union pc_command
  * The format for input commands from the user.
@@ -78,13 +78,14 @@ union mcu_to_pc
   struct mcu_to_pc_format_t
   {
     /* 1 byte */
-    enum
-    {
-      DATA  = 0x00,
-      RETRY = 0x01,
-      OK    = 0x02,
-      ALERT = 0xFF,
-    } id;
+//    enum
+//    {
+//      DATA  = 0x00,
+//      RETRY = 0x01,
+//      OK    = 0x02,
+//      ALERT = 0xFF,
+//    } id;
+    char id;
 
     /* 6 bytes */
     union __PACK
@@ -113,6 +114,8 @@ union mcu_to_pc
         uint16_t timestamp;
         uint8_t  data[3];
       } alert;
+  
+      char empty[0];
     } payload;
     
     /* 1 byte */
@@ -121,6 +124,9 @@ union mcu_to_pc
   
   char bytes[sizeof(struct mcu_to_pc_format_t)];
 }; 
+
+int send_packet
+  (union mcu_to_pc *p);
 
 #endif /* __PROTOCOL_H_GUARD */
 

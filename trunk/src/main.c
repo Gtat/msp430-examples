@@ -39,10 +39,6 @@
 
 #include "drivers/inlines.c"
 
-/* declare and initialize a ring queue AKA circular buffer AKA fifo */
-/* data type is char, depth is 16 elements, identifier is "stringq" */
-/* declare it globally so it is shared between main and interrupt */
-RING_QUEUE_CREATE(char, 16, incoming_q);
 
 /**
  * Write 1 or 0 bytes to the terminal.
@@ -51,62 +47,86 @@ RING_QUEUE_CREATE(char, 16, incoming_q);
  *
  * @return  The number of bytes written.
  */
-int putchar
-  (int c)
-{
-    while(UCA0STAT & UCBUSY);  /* wait until USCI channel A is not busy */
-    UCA0TXBUF = c;             /* write given character to output register */
-    return 1;                  /* wrote one byte */
-}
 
 
-union mcu_to_pc mcu_cmd = 
+union mcu_to_pc mcu_packet = 
   {
     .command = 
       { 
-        .id = DATA,
+//        .id = DATA,
       },
   }; 
 
-union pc_to_mcu  pc_cmd;
+union pc_to_mcu  pc_packet;
+
+/** The big ugly global data passing structure.
+ */
+static struct 
+{
+  volatile uint8_t pc_packets;
+  volatile uint8_t mcu_packets;
+
+  const uint8_t channels;
+  uint16_t samples[8];
+  volatile uint8_t sample_ct;
+} control = 
+  { 
+    .channels = 6,
+  };
+
+/* declare and initialize a ring queue AKA circular buffer AKA fifo */
+/* data type is char, depth is 16 elements, identifier is "stringq" */
+/* declare it globally so it is shared between main and interrupt */
+RING_QUEUE_CREATE      (char,                      16, incoming_comm_q);
+//RING_QUEUE_CREATE      (uint16_t,                   8, sample_q);
+//RING_QUEUE_ARRAY_CREATE(uint8_t, control.channels,  8, sample_q);
+
 
 int main
   (void)
 {
-  int i;
+  char i;
+  uint8_t ch;
+  uint16_t sample;
 
   setup();                                     /* system setup */
   usci_setup(USCI_CHANNEL_A0, USCI_MODE_RS232, /* channel A, serial/RS232 mode */
              1000000/9600,                     /* 9600 baud using 1 MHz ref clock */
              UCA0RXIE);                        /* receive interrupts enabled */
 
+  putchar('!');
 
 //  timer_setup();
-  adc_setup(6, 1);
+  adc_setup(control.channels, 1);
 
 
-  P1DIR |= 0x01;                               /* set LED pin as output */
-
-  ADC10CTL0 &= ~ENC;
   while (ADC10CTL1 & BUSY);
-  ADC10SA    = &mcu_cmd.command.payload.samples;
-  ADC10DTC0 &= ~(ADC10TB | ADC10CT);
-  ADC10DTC1  = 6;
-  ADC10CTL0 |=  ENC;                    /* enable conversion */
+  ADC10DTC0  = ADC10CT;
+  ADC10DTC1  = control.channels;
+  ADC10CTL0 |= ENC;
+  ADC10SA    = (uint16_t)control.samples;
   
-  __bis_SR_register(LPM0_bits | GIE);
-  for (i=0; i<sizeof(union pc_to_mcu); i++)
-  {
-    putchar(mcu_cmd.bytes[i]);
-  }
+    while(1)
+    {
+      __bis_SR_register(LPM0_bits | GIE);       /* enter low power mode 0 */
+                                                /* with interrupts on */
+      for ( ; control.sample_ct; control.sample_ct--)
+      {
+        mcu_packet.command.id = i++;
+
+        for (ch = 0; ch < control.channels; ch++)
+        {
+          mcu_packet.command.payload.samples[ch] = control.samples[ch] >> 2;
+        }
+        send_packet(&mcu_packet);
+      }
+    }
 
 //  while(1)
 //  {
-    __bis_SR_register(LPM0_bits | GIE);       /* enter low power mode 0 */
-                                              /* with interrupts on */
-//    while (incoming_q.length >= sizeof(union pc_command))
+//    while (incoming_comm_q.length >= sizeof(union pc_to_mcu))
 //    {
-//      RING_QUEUE_POP_MANY(incoming_q, pc_cmd.bytes, sizeof(union pc_command));
+//      RING_QUEUE_POP_MANY(incoming_comm_q, pc_cmd.bytes, sizeof(union pc_to_mcu));
 //    }
 //  }
   return 0;

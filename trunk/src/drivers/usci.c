@@ -90,3 +90,11 @@ int usci_setup
   return 0;
 }
 
+int putchar
+  (int c)
+{
+  while (UCA0STAT & UCBUSY);
+  UCA0TXBUF = c;
+  return 1;
+}
+

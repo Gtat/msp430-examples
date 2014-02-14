@@ -29,6 +29,14 @@
     const uint8_t    depth;               \
   } 
 
+
+//#define RING_QUEUE_ARRAY_DECLARE(type, width, elem_ct) \
+//  struct
+//  {
+//    uint16_t         data[sizeof(type)*width][elem_ct];
+//    uint8_t          head, tail;
+//    volatile
+
 /** \def RING_QUEUE_INIT(elem_ct)
  *  Generate the initializer for a FIFO structure.
  *
@@ -52,6 +60,9 @@
  */
 #define RING_QUEUE_CREATE(type, elem_ct, name) \
   RING_QUEUE_DECLARE(type, elem_ct) name = RING_QUEUE_INIT(elem_ct)
+
+#define RING_QUEUE_ARRAY_CREATE(type, width, elem_ct, name) \
+  RING_QUEUE_CREATE(typeof(uint16_t _[sizeof(type*width)/2]), elem_ct, name)
 
 /** \def RING_QUEUE_EMPTY(q)
  *  Check if the given FIFO is empty.
@@ -106,6 +117,7 @@
       q.length++;                      \
     }                                  \
   } while (0)
+
 
 /** \def RING_QUEUE_POP_ALWAYS(q)
  *  Remove an element to the given FIFO. Don't check the length -- the
