@@ -21,9 +21,9 @@
 /** \union pc_command
  * The format for input commands from the user.
  */
-union pc_command
+union pc_to_mcu
 {
-  struct __PACK pc_command_format_t
+  struct __PACK pc_to_mcu_format_t
   {
     char         : 4; /* always zero / unimplemented */
 
@@ -67,15 +67,15 @@ union pc_command
    uint8_t crc;
   } command;
 
-  char bytes[sizeof(struct pc_command_format_t)];
+  char bytes[sizeof(struct pc_to_mcu_format_t)];
 } __attribute__((packed));
 
 /** \union mcu_command
  *  The format for messages from the microcontroller.
  */
-union mcu_command
+union mcu_to_pc
 {
-  struct mcu_command_format_t
+  struct mcu_to_pc_format_t
   {
     /* 1 byte */
     enum
@@ -119,7 +119,7 @@ union mcu_command
     char crc;    
   } command;
   
-  char bytes[sizeof(struct mcu_command_format_t)];
+  char bytes[sizeof(struct mcu_to_pc_format_t)];
 }; 
 
 #endif /* __PROTOCOL_H_GUARD */

@@ -60,33 +60,21 @@ int putchar
 }
 
 
-union mcu_command mcu_cmd;
-/*  = {
+union mcu_to_pc mcu_cmd = 
+  {
     .command = 
       { 
-        .id = OK,
-        .payload = 
-          {
-            .alert = 
-              {
-                .severity  = WARNING,
-                .type      = TOXIC,
-                .channel   = 5,
-
-                .timestamp = 0x1234,
-                .data      = {'\xC0', '\xFF', '\xEE',},
-              },
-          }, 
-        .crc = 0x00,
+        .id = DATA,
       },
   }; 
-*/
 
-union pc_command  pc_cmd;
+union pc_to_mcu  pc_cmd;
 
 int main
   (void)
 {
+  int i;
+
   setup();                                     /* system setup */
   usci_setup(USCI_CHANNEL_A0, USCI_MODE_RS232, /* channel A, serial/RS232 mode */
              1000000/9600,                     /* 9600 baud using 1 MHz ref clock */
@@ -94,10 +82,23 @@ int main
 
 
 //  timer_setup();
-  adc_setup(1, 1);
+  adc_setup(6, 1);
 
 
   P1DIR |= 0x01;                               /* set LED pin as output */
+
+  ADC10CTL0 &= ~ENC;
+  while (ADC10CTL1 & BUSY);
+  ADC10SA    = &mcu_cmd.command.payload.samples;
+  ADC10DTC0 &= ~(ADC10TB | ADC10CT);
+  ADC10DTC1  = 6;
+  ADC10CTL0 |=  ENC;                    /* enable conversion */
+  
+  __bis_SR_register(LPM0_bits | GIE);
+  for (i=0; i<sizeof(union pc_to_mcu); i++)
+  {
+    putchar(mcu_cmd.bytes[i]);
+  }
 
 //  while(1)
 //  {

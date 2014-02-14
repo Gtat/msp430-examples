@@ -38,8 +38,7 @@ static inline void timer_setup
     /* SET REF VOLTAGES AND CHANNELS */
   ADC10CTL1 = SHS_1 |                  /* use Timer_A0 */
               CONSEQ_3 |               /* repeat sequence of channels */
-              INCH_4;
-              //((channels & 0xF) <<4 ); /* sequence through the requested */
+              ((channels & 0xF) << 3); /* sequence through the requested */
                                        /* number of channels */
 
   ADC10CTL0 = ADC10SHT_2 |             /* sample and hold for 16 clocks */
@@ -50,21 +49,20 @@ static inline void timer_setup
   TACCR0   = 30;                            // Delay to allow Ref to settle
   TACTL    = TASSEL_2 | MC_1;               // TACLK = SMCLK, Up mode.
   TACCTL0 |= CCIE;                          // Compare-mode interrupt.
-  __bis_SR_register(LPM0_bits | GIE);
-  //LPM0;                                     // Wait for delay.
+  __bis_SR_register(LPM0_bits | GIE);  /* low power with interrupts enabled */
   TACCTL0 &= ~CCIE;                         // Disable timer Interrupt
   __disable_interrupt();
 
-  /* END OF DELAY, DISABLE ISR USED IN DELAY */
-  ADC10AE0 = BIT4;//1 << channels;
-  ADC10CTL0 |= ENC;                    /* enable conversion */
-  /* SET TIMER PWM FOR ADC10 TRIGGER! */
+  ADC10AE0 = 1 << channels;            /* analog inputs on */
   
-  TACCR0 = 0xf424;                          // PWM Period = 1 Hz
-  TACCTL1 = OUTMOD_3;                       // TACCR1 set/reset
-  TACCR1 = 0xf424;                          // TACCR1 PWM Duty Cycle
-  TACTL = TASSEL_2 |                        // SMCLK
-          MC_1 |                            // up mode
-          ID_3;                             // divide by 8
+  /* SET TIMER PWM FOR ADC10 TRIGGER! */
+  TACTL = TASSEL_2 |                   /* Source from 16 MHz SMCLK */
+          MC_1 |                       /* Count up */
+          ID_3;                        /* divide clock by 8 */
+  TACCTL1 = OUTMOD_3;                  /* When counter == TACCR1, set output. */
+                                       /* When counter == TACCR0, clear output. */
+  TACCR0 = 0xf424;                     /* 62500 * 16 / (16 MHz / 2 / 8) = 1.0 s */
+  TACCR1 = 0xf424;                     /* 50% duty cycle */
+
 }
 
