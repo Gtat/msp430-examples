@@ -118,7 +118,7 @@ int main
         {
           mcu_packet.command.payload.samples[ch] = control.samples[ch] >> 2;
         }
-        send_packet(&mcu_packet);
+        send_mcu_packet(&mcu_packet);
       }
     }
 

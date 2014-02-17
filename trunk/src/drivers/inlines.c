@@ -41,11 +41,11 @@ static inline void timer_setup
  * @param rate      The starting sample rate in Hz.
  */
  static inline void adc_setup 
-  (uint8_t channels, uint8_t rate)
+  (const uint8_t channels, const uint8_t rate)
   __attribute__((always_inline));
 
  static inline void adc_setup 
-  (uint8_t channels, uint8_t rate)
+  (const uint8_t channels, const uint8_t rate)
 {
     /* SET REF VOLTAGES AND CHANNELS */
   ADC10CTL1 = SHS_1 |                  /* use Timer_A0 */

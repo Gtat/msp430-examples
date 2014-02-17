@@ -17,6 +17,7 @@
 #include "global.h"
 
 #define __PACK __attribute__((packed))
+//#define CRC_ENABLED
 
 /** \union pc_command
  * The format for input commands from the user.
@@ -28,7 +29,7 @@ union pc_to_mcu
     char         : 4; /* always zero / unimplemented */
 
     /* 3-bit IDs */
-    enum 
+    enum pc_id
     { DUMP        = 0x0,
       CAPTURE     = 0x1,
       HALT        = 0x2,
@@ -47,7 +48,7 @@ union pc_to_mcu
       struct
       {
         char            : 2; /* always zero / unimplemented */
-        enum
+        enum storage_rate
         {
           NONE,
           SOME, 
@@ -78,14 +79,13 @@ union mcu_to_pc
   struct mcu_to_pc_format_t
   {
     /* 1 byte */
-//    enum
-//    {
-//      DATA  = 0x00,
-//      RETRY = 0x01,
-//      OK    = 0x02,
-//      ALERT = 0xFF,
-//    } id;
-    char id;
+    enum mcu_id
+    {
+      DATA  = 0x00,
+      RETRY = 0x01,
+      OK    = 0x02,
+      ALERT = 0xFF,
+    } id;
 
     /* 6 bytes */
     union __PACK
@@ -96,14 +96,14 @@ union mcu_to_pc
       {
         char channel  : 3;
 
-        enum __PACK
+        enum __PACK alert_type
         {
           BATTERY   = 0x0,
           EXPLOSIVE = 0x1,
           TOXIC     = 0x2,
         } type        : 3;
 
-        enum __PACK
+        enum __PACK alert_severity
         {
           NOTICE   = 0x0,
           WARNING  = 0x1,
@@ -125,8 +125,14 @@ union mcu_to_pc
   char bytes[sizeof(struct mcu_to_pc_format_t)];
 }; 
 
-int send_packet
+int send_mcu_packet
   (union mcu_to_pc *p);
+
+#ifdef  CRC_ENABLED
+#define CRC8_INIT 0xFF
+uint8_t crc8
+  (uint8_t *data, int len, uint8_t crc);
+#endif
 
 #endif /* __PROTOCOL_H_GUARD */
 
