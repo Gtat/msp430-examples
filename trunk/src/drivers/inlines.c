@@ -54,9 +54,7 @@ static inline void timer_setup
 //              (((channels-1) & 0xF)*0x1000u); /* sequence through the requested */
                                        /* number of channels */
 
-  ADC10CTL0 = SREF_1 |
-              REFON |
-              REF2_5V |
+  ADC10CTL0 = SREF_0 |
               ADC10SHT_3 |             /* sample and hold for 64 clocks */
               ADC10ON |                /* ADC on */
               ADC10IE;                 /* interrupt active */
@@ -69,7 +67,7 @@ static inline void timer_setup
   TACCTL0 &= ~CCIE;                         // Disable timer Interrupt
   __disable_interrupt();
 
-  ADC10AE0   = 0x38;//(channels-1);            /* analog inputs on */
+  ADC10AE0   = 0xFFFF >> (16-channels) & ~0x6;            /* analog inputs on */
 //  ADC10CTL0 |= ENC;
   
   /* SET TIMER PWM FOR ADC10 TRIGGER! */

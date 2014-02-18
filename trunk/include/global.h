@@ -3,4 +3,19 @@
 
 #define NUM_SIGNAL_CHS 6
 
+#include "ringq.h"
+
+typedef uint16_t sample_buffer[NUM_SIGNAL_CHS];
+RING_QUEUE_DECLARE_GLOBAL(char,          16, incoming_comm_q);
+RING_QUEUE_DECLARE_GLOBAL(char,          16, outgoing_comm_q);
+RING_QUEUE_DECLARE_GLOBAL(sample_buffer,  4, sample_q);
+
+extern struct control_t
+{
+  volatile uint8_t pc_packets;
+  volatile uint8_t mcu_packets;
+
+  const    uint8_t channels;
+} control;
+
 #endif /* __GLOBAL_H_GUARD */

@@ -17,7 +17,7 @@
 #include "global.h"
 
 #define __PACK __attribute__((packed))
-//#define CRC_ENABLED
+#define CRC_ENABLED
 
 /** \union pc_command
  * The format for input commands from the user.
@@ -68,7 +68,7 @@ union pc_to_mcu
    uint8_t crc;
   } command;
 
-  char bytes[sizeof(struct pc_to_mcu_format_t)];
+  uint8_t bytes[sizeof(struct pc_to_mcu_format_t)];
 } __attribute__((packed));
 
 /** \union mcu_command
@@ -119,11 +119,14 @@ union mcu_to_pc
     } payload;
     
     /* 1 byte */
-    char crc;    
+    uint8_t crc;    
   } command;
   
-  char bytes[sizeof(struct mcu_to_pc_format_t)];
+  uint8_t bytes[sizeof(struct mcu_to_pc_format_t)];
 }; 
+
+int build_mcu_packet
+  (union mcu_to_pc *p, enum mcu_id id, ...);
 
 int send_mcu_packet
   (union mcu_to_pc *p);

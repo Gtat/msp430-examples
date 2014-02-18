@@ -32,6 +32,7 @@
 #include <msp430.h>
 #include <stdio.h>
 
+#include "global.h"
 #include "ringq.h"
 #include "protocol.h"
 
@@ -61,39 +62,27 @@ union pc_to_mcu  pc_packet;
 
 /** The big ugly global data passing structure.
  */
-static struct 
-{
-  volatile uint8_t pc_packets;
-  volatile uint8_t mcu_packets;
-
-  const uint8_t channels;
-  uint16_t samples[8];
-  volatile uint8_t sample_ct;
-} control = 
+struct control_t control = 
   { 
-    .channels = 6,
+    .channels = NUM_SIGNAL_CHS,
   };
 
 /* declare and initialize a ring queue AKA circular buffer AKA fifo */
 /* data type is char, depth is 16 elements, identifier is "stringq" */
 /* declare it globally so it is shared between main and interrupt */
-RING_QUEUE_CREATE      (char,                      16, incoming_comm_q);
-//RING_QUEUE_CREATE      (uint16_t,                   8, sample_q);
-//RING_QUEUE_ARRAY_CREATE(uint8_t, control.channels,  8, sample_q);
-
+RING_QUEUE_CREATE_PREDEFINED(char,          16, incoming_comm_q);
+RING_QUEUE_CREATE_PREDEFINED(char,          16, outgoing_comm_q);
+RING_QUEUE_CREATE_PREDEFINED(sample_buffer,  4, sample_q);
 
 int main
   (void)
 {
-  char i;
-  uint8_t ch;
-  uint16_t sample;
-
   setup();                                     /* system setup */
   usci_setup(USCI_CHANNEL_A0, USCI_MODE_RS232, /* channel A, serial/RS232 mode */
              1000000/9600,                     /* 9600 baud using 1 MHz ref clock */
              UCA0RXIE);                        /* receive interrupts enabled */
 
+  P1DIR = 0x01;
   putchar('!');
 
 //  timer_setup();
@@ -101,26 +90,21 @@ int main
 
 
   while (ADC10CTL1 & BUSY);
-  ADC10DTC0  = ADC10CT;
+  ADC10DTC0  = 0;
   ADC10DTC1  = control.channels;
   ADC10CTL0 |= ENC;
-  ADC10SA    = (uint16_t)control.samples;
+  ADC10SA    = (uint16_t)&sample_q.data[sample_q.head];
   
-    while(1)
-    {
-      __bis_SR_register(LPM0_bits | GIE);       /* enter low power mode 0 */
+  while(1)
+  {
+    __bis_SR_register(LPM0_bits | GIE);       /* enter low power mode 0 */
                                                 /* with interrupts on */
-      for ( ; control.sample_ct; control.sample_ct--)
-      {
-        mcu_packet.command.id = i++;
-
-        for (ch = 0; ch < control.channels; ch++)
-        {
-          mcu_packet.command.payload.samples[ch] = control.samples[ch] >> 2;
-        }
-        send_mcu_packet(&mcu_packet);
-      }
+    while (!RING_QUEUE_EMPTY(sample_q))
+    {
+      build_mcu_packet(&mcu_packet, DATA);
+      send_mcu_packet(&mcu_packet);
     }
+  }
 
 //  while(1)
 //  {

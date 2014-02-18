@@ -17,6 +17,7 @@
  */
 
 #include "drivers/usci.h"
+#include "ringq.h"
 
 /**
  * Set up the universal serial communication interface (USCI) as
@@ -93,8 +94,8 @@ int usci_setup
 int putchar
   (int c)
 {
-  while (UCA0STAT & UCBUSY);
-  UCA0TXBUF = c;
+  RING_QUEUE_PUSH(outgoing_comm_q, c);
+  IE2 |= UCA0TXIE;
   return 1;
 }
 

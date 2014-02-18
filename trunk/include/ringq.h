@@ -29,13 +29,8 @@
     const uint8_t    depth;               \
   } 
 
-
-//#define RING_QUEUE_ARRAY_DECLARE(type, width, elem_ct) \
-//  struct
-//  {
-//    uint16_t         data[sizeof(type)*width][elem_ct];
-//    uint8_t          head, tail;
-//    volatile
+#define RING_QUEUE_DECLARE_GLOBAL(type, elem_ct, name) \
+  extern typeof(RING_QUEUE_DECLARE(type, elem_ct)) name
 
 /** \def RING_QUEUE_INIT(elem_ct)
  *  Generate the initializer for a FIFO structure.
@@ -48,7 +43,6 @@
     .tail   = 0,                 \
     .length = 0,                 \
     .depth  = elem_ct,           \
-    .data   = { 0 },             \
   }
 
 /** \def RING_QUEUE_CREATE(type, elem_ct, name)
@@ -60,6 +54,9 @@
  */
 #define RING_QUEUE_CREATE(type, elem_ct, name) \
   RING_QUEUE_DECLARE(type, elem_ct) name = RING_QUEUE_INIT(elem_ct)
+
+#define RING_QUEUE_CREATE_PREDEFINED(type, elem_ct, name) \
+  typeof(name) name = RING_QUEUE_INIT(elem_ct)
 
 #define RING_QUEUE_ARRAY_CREATE(type, width, elem_ct, name) \
   RING_QUEUE_CREATE(typeof(uint16_t _[sizeof(type*width)/2]), elem_ct, name)
@@ -101,6 +98,16 @@
     q.head       = (q.head + 1) & (q.depth - 1); \
   } while (0)
 
+#define RING_QUEUE_PUSH_NO_DATA(q)           \
+  do                                         \
+  {                                          \
+    if (!RING_QUEUE_FULL(q))                 \
+    {                                        \
+      q.head = (q.head + 1) & (q.depth - 1); \
+      ++q.length;                            \
+    }                                        \
+  } while (0)
+
 /** \def RING_QUEUE_PUSH(q, elem)
  *  Add an element to the given FIFO. Check the length -- do nothing if the
  *  buffer is full.
@@ -134,6 +141,16 @@
      ret;                                   \
   }) 
 
+#define RING_QUEUE_POP_NO_DATA(q)            \
+  do                                         \
+  {                                          \
+    if (!RING_QUEUE_EMPTY(q))                \
+    {                                        \
+      q.tail = (q.tail + 1) & (q.depth - 1); \
+      --q.length;                            \
+    }                                        \
+  } while (0)
+
 /** \def RING_QUEUE_POP(q)
  *  Remove an element to the given FIFO. Check the length and return 0
  *  without manipulating the queue if it is empty.
@@ -145,7 +162,7 @@
   ({                                  \
     __typeof__(q.data[0]) ret;        \
     ret = 0;                          \
-    if (!RING_QUEUE_EMPTY(q))                 \
+    if (!RING_QUEUE_EMPTY(q))         \
     {                                 \
       q.length--;                     \
       ret = RING_QUEUE_POP_ALWAYS(q); \

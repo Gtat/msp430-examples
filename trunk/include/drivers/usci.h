@@ -10,6 +10,7 @@
 #define __DRIVERS_USCI_H_GUARD
 
 #include <msp430.h>
+#include "global.h"
 
 #define BAUDRATE(clk, baud) ((clk) / (baud))
 

@@ -13,6 +13,21 @@ __interrupt void USCI_rx_isr
 //  }
 }
 
+#pragma vector=USCIAB0TX_VECTOR
+__interrupt void USCI_tx_isr
+  (void)
+{
+  P1OUT ^= 0x01;
+  if (!RING_QUEUE_EMPTY(outgoing_comm_q))
+  {
+    UCA0TXBUF = RING_QUEUE_POP(outgoing_comm_q); 
+  } 
+  else
+  {
+    IE2 &= ~UCA0TXIE;
+  }
+}
+
 #pragma vector=WDT_VECTOR
 __interrupt void WDT_isr
   (void)
@@ -23,8 +38,8 @@ __interrupt void WDT_isr
 __interrupt void ADC10_isr
   (void)
 {
-//  RING_QUEUE_PUSH(sample_q, ADC10MEM);
-  control.sample_ct++;
+  RING_QUEUE_PUSH_NO_DATA(sample_q);
+  ADC10SA = (uint16_t)&sample_q.data[sample_q.head];
   __bic_SR_register_on_exit(LPM0_bits);
 }
 

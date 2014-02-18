@@ -6,31 +6,51 @@
 int build_mcu_packet
   (union mcu_to_pc *p, enum mcu_id id, ...)
 {
-  p->command.id = id;
+  va_list ap;
+  static char i = 0;
 
+  p->command.id = i++;
+
+  va_start(ap, id);
   switch (id)
   {
     case DATA:
     {
+      int ch;
+ 
+      for (ch=0; ch < control.channels; ch++)
+      {
+        p->command.payload.samples[ch] = 
+          sample_q.data[sample_q.tail][ch] >> 2;
+        RING_QUEUE_POP_NO_DATA(sample_q);
+      }
+
+      break;
     }
     case RETRY:
     {
+      break;
     }
     case OK:
     {
+      break;
     }
     case ALERT:
     {
+      break;
     }
     default:
     {
+      break;
     }
   }
+  va_end(ap);
 
 #ifdef CRC_ENABLED
   /* don't CRC the CRC */
   p->command.crc = crc8(p->bytes, sizeof(union mcu_to_pc)-1, CRC8_INIT);
 #endif
+  return 0;
 }
 
 int send_mcu_packet
@@ -40,6 +60,7 @@ int send_mcu_packet
   for (i = 0; i < sizeof(union mcu_to_pc); ++i)
   {
     putchar(p->bytes[i]);
+ //   RING_QUEUE_PUSH(outgoing_comm_q, p->bytes[i]);
   }
 
   return i;

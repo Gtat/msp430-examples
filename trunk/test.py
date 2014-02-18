@@ -1,3 +1,4 @@
+import collections
 import serial
 import struct
 
@@ -14,6 +15,8 @@ def main(serial_path):
       print '%s open' % ser.name
     else:
       return
+
+    buf = collections.deque()
 
     while True:
       bytect = 0
