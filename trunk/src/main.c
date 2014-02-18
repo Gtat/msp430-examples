@@ -50,14 +50,7 @@
  */
 
 
-union mcu_to_pc mcu_packet = 
-  {
-    .command = 
-      { 
-//        .id = DATA,
-      },
-  }; 
-
+union mcu_to_pc mcu_packet;
 union pc_to_mcu  pc_packet;
 
 /** The big ugly global data passing structure.
@@ -83,9 +76,8 @@ int main
              UCA0RXIE);                        /* receive interrupts enabled */
 
   P1DIR = 0x01;
-  putchar('!');
+//  while(1);
 
-//  timer_setup();
   adc_setup(control.channels, 1);
 
 
@@ -106,13 +98,6 @@ int main
     }
   }
 
-//  while(1)
-//  {
-//    while (incoming_comm_q.length >= sizeof(union pc_to_mcu))
-//    {
-//      RING_QUEUE_POP_MANY(incoming_comm_q, pc_cmd.bytes, sizeof(union pc_to_mcu));
-//    }
-//  }
   return 0;
 }
 
