@@ -1,7 +1,7 @@
 TARGET     = iegas
 MCU        = msp430g2553
 
-SOURCES  = main.c usci.c protocol.c
+SOURCES  = main.c usci.c protocol.c parameter.c
 VPATH    = src/drivers:src
 BUILDDIR = build/
 INCLUDES = -Iinclude
@@ -29,7 +29,6 @@ MV       = mv
 OBJECTS = $(SOURCES:.c=.o)
 all: $(TARGET).elf $(TARGET).hex $(TARGET).text Makefile clean
 $(TARGET).elf: $(OBJECTS)
-	echo
 	$(CC) $(OBJECTS) $(LDFLAGS) $(LIBS) -o $@
 	$(SIZE) $(TARGET).elf
 

@@ -51,7 +51,7 @@ static inline void adc_setup
   TACCTL0 &= ~CCIE;                    /* disable timer Interrupt */
   __disable_interrupt();
 
-  ADC10AE0   = 0xFFFF >> (16-channels) & ~0x6;            /* analog inputs on */
+  ADC10AE0   = 0xFFFF >> (16-channels) & ~0x7;            /* analog inputs on */
   
   /* SET TIMER PWM FOR ADC10 TRIGGER! */
   TACCTL1 = OUTMOD_3;                  /* When counter == TACCR1, set output. */

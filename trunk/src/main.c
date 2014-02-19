@@ -78,6 +78,9 @@ int main
              1000000/9600,                     /* 9600 baud using 1 MHz ref clock */
              UCA0RXIE);                        /* receive interrupts enabled */
   adc_setup(control.channels, 1);
+ 
+  P1DIR = 0x01;
+  P1OUT = 0x00;
 
   while (ADC10CTL1 & BUSY);
   ADC10DTC0  = 0;

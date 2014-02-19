@@ -1,6 +1,7 @@
 #include <stdarg.h>
 
 #include "protocol.h"
+#include "drivers/parameter.h"
 #include "drivers/usci.h"
 
 int build_mcu_packet
@@ -15,8 +16,8 @@ int build_mcu_packet
   {
     case DATA:
     {
-      int ch;
-      int ch_max = va_arg(ap, int);
+      unsigned int ch;
+      unsigned int ch_max = va_arg(ap, unsigned int);
        
       for (ch = 0; ch < ch_max; ++ch)
       {
@@ -53,10 +54,10 @@ int build_mcu_packet
   return 0;
 }
 
-int send_mcu_packet
+unsigned int send_mcu_packet
   (union mcu_to_pc *p)
 {
-  int i;
+  unsigned int i;
   for (i = 0; i < sizeof(union mcu_to_pc); ++i)
   {
     putchar(p->bytes[i]);
@@ -91,6 +92,7 @@ enum pc_packet_status process_pc_packet
     }
     case SET_RATES:
     {
+      update_rates(0, p->command.payload.taccr);
       break;
     }
     case SET_MARGIN:

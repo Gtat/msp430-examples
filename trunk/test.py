@@ -10,6 +10,10 @@ BYTES_PER_INCOMING_PACKET = 8
 def send_packet(port, checker, *args):
   packet = struct.pack('BBB', *args)
   check  = struct.pack('B', checker(packet))
+  print 'SEND ',
+  for x in (packet + check):
+    print '%02x ' % ord(x),
+  print
   port.write(packet + check)
 
 def main(serial_path):
@@ -27,8 +31,11 @@ def main(serial_path):
     return
 
   try:
+    # SET_RATES to 2 Hz
+    send_packet(ser, crc, 0x60, 0x2c, 0x0a)
+
     # DUMP message
-    send_packet(ser, crc, 0, 0, 0)
+    send_packet(ser, crc, 0x00, 0, 0)
 
     while True:
       buf.appendleft(ser.read())
@@ -49,7 +56,7 @@ def main(serial_path):
   except KeyboardInterrupt:
     print '^C'
     # HALT message
-    send_packet(ser, crc, 0x70, 0, 0)
+    send_packet(ser, crc, 0x20, 0, 0)
     return
   
 
