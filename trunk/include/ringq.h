@@ -13,6 +13,7 @@
 #define __RINGQ_H_GUARD
 
 #include <stdint.h>
+#include <stddef.h>
 
 /** \def RING_QUEUE_DECLARE(type, elem_ct)
  *  Generate the declaration for a FIFO structure.
@@ -158,31 +159,31 @@
  *  @param  q    The FIFO to manipulate, created with RING_QUEUE_CREATE().
  *  @return      The oldest element in the queue if nonempty, 0 otherwise.  
  */
-#define RING_QUEUE_POP(q)             \
-  ({                                  \
-    __typeof__(q.data[0]) ret;        \
-    ret = 0;                          \
-    if (!RING_QUEUE_EMPTY(q))         \
-    {                                 \
-      q.length--;                     \
-      ret = RING_QUEUE_POP_ALWAYS(q); \
-    }                                 \
-    ret;                              \
+#define RING_QUEUE_POP(q)               \
+  ({                                    \
+    __typeof__(q.data[0]) __ret;        \
+    __ret = 0;                          \
+    if (!RING_QUEUE_EMPTY(q))           \
+    {                                   \
+      q.length--;                       \
+      __ret = RING_QUEUE_POP_ALWAYS(q); \
+    }                                   \
+    __ret;                              \
   })
 
 #define RING_QUEUE_POP_MANY(q, dest, count)  \
   ({                                         \
     size_t i, limit;                         \
-    __typeof(q.data[0]) *p;                  \
+    __typeof(q.data[0]) *__p;                  \
                                              \
-    p     = (dest);                          \
+    __p   = (dest);                          \
     limit = (count);                         \
                                              \
     for (i=0; /* side effects only once */   \
          i < limit && !RING_QUEUE_EMPTY(q);  \
          i++)                                \
     {                                        \
-      *p++ = RING_QUEUE_POP_ALWAYS(q);       \
+      *__p++ = RING_QUEUE_POP_ALWAYS(q);     \
       q.length--;                            \
     }                                        \
     i;                                       \

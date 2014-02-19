@@ -1,23 +1,7 @@
-#pragma vector=USCIAB0RX_VECTOR
-__interrupt void USCI_rx_isr
-  (void)
-{
-  /* at each received keystroke: */
-//  RING_QUEUE_PUSH(incoming_comm_q, UCA0RXBUF); /* change upper <-> lower case */
-//                                              /* of received character and   */
-//                                              /* put it in a fifo            */
-//  if (incoming_comm_q.length >= sizeof(union pc_to_mcu))
-//  {
-//    control.pc_packets++;
-//    __bic_SR_register_on_exit(LPM0_bits);
-//  }
-}
-
 #pragma vector=USCIAB0TX_VECTOR
 __interrupt void USCI_tx_isr
   (void)
 {
-  P1OUT ^= 0x01;
   if (!RING_QUEUE_EMPTY(outgoing_comm_q))
   {
     UCA0TXBUF = RING_QUEUE_POP(outgoing_comm_q); 
@@ -28,10 +12,16 @@ __interrupt void USCI_tx_isr
   }
 }
 
-#pragma vector=WDT_VECTOR
-__interrupt void WDT_isr
+#pragma vector=USCIAB0RX_VECTOR
+__interrupt void USCI_rx_isr
   (void)
 {
+  RING_QUEUE_PUSH(incoming_comm_q, UCA0RXBUF); 
+  if (incoming_comm_q.length >= sizeof(union pc_to_mcu))
+  {
+    control.pc_packets++;
+    __bic_SR_register_on_exit(LPM0_bits);
+  }
 }
 
 #pragma vector=ADC10_VECTOR

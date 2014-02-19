@@ -131,6 +131,18 @@ int build_mcu_packet
 int send_mcu_packet
   (union mcu_to_pc *p);
 
+enum pc_packet_status
+{
+  PC_PACKET_OK,
+  PC_PACKET_EMPTY,
+  PC_PACKET_BAD_CRC,
+  PC_PACKET_BEGIN,
+  PC_PACKET_HALT,
+};
+
+enum pc_packet_status process_pc_packet
+  (union pc_to_mcu *p);
+
 #ifdef  CRC_ENABLED
 #define CRC8_INIT 0xFF
 uint8_t crc8

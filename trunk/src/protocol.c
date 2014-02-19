@@ -7,9 +7,8 @@ int build_mcu_packet
   (union mcu_to_pc *p, enum mcu_id id, ...)
 {
   va_list ap;
-  static char i = 0;
 
-  p->command.id = i++;
+  p->command.id = id;
 
   va_start(ap, id);
   switch (id)
@@ -17,8 +16,9 @@ int build_mcu_packet
     case DATA:
     {
       int ch;
- 
-      for (ch=0; ch < control.channels; ch++)
+      int ch_max = va_arg(ap, int);
+       
+      for (ch = 0; ch < ch_max; ++ch)
       {
         p->command.payload.samples[ch] = 
           sample_q.data[sample_q.tail][ch] >> 2;
@@ -60,10 +60,55 @@ int send_mcu_packet
   for (i = 0; i < sizeof(union mcu_to_pc); ++i)
   {
     putchar(p->bytes[i]);
- //   RING_QUEUE_PUSH(outgoing_comm_q, p->bytes[i]);
   }
 
   return i;
+}
+
+enum pc_packet_status process_pc_packet
+  (union pc_to_mcu *p)
+{
+  RING_QUEUE_POP_MANY(incoming_comm_q, p->bytes, sizeof(union pc_to_mcu));
+  if (p->command.crc != crc8(p->bytes, sizeof(union pc_to_mcu)-1, CRC8_INIT))
+  {
+    return PC_PACKET_BAD_CRC;
+  }
+
+  switch (p->command.id)
+  {
+    case DUMP:
+    {
+      return PC_PACKET_BEGIN;
+      break;
+    }
+    case CAPTURE:
+    {
+      break;
+    }
+    case SET_VOLTAGE:
+    {
+      break;
+    }
+    case SET_RATES:
+    {
+      break;
+    }
+    case SET_MARGIN:
+    {
+      break;
+    }
+    case HALT:
+    {
+      return PC_PACKET_HALT;
+      break;
+    }
+    default:
+    {
+      return PC_PACKET_EMPTY;
+    }
+  }
+
+  return PC_PACKET_OK;
 }
 
 #ifdef CRC_ENABLED

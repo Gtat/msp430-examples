@@ -57,29 +57,27 @@ union pc_to_mcu  pc_packet;
  */
 struct control_t control = 
   { 
+    .state    = STATE_IDLE,
     .channels = NUM_SIGNAL_CHS,
   };
 
 /* declare and initialize a ring queue AKA circular buffer AKA fifo */
 /* data type is char, depth is 16 elements, identifier is "stringq" */
 /* declare it globally so it is shared between main and interrupt */
-RING_QUEUE_CREATE_PREDEFINED(char,          16, incoming_comm_q);
-RING_QUEUE_CREATE_PREDEFINED(char,          16, outgoing_comm_q);
+RING_QUEUE_CREATE_PREDEFINED(uint8_t,       16, incoming_comm_q);
+RING_QUEUE_CREATE_PREDEFINED(uint8_t,       16, outgoing_comm_q);
 RING_QUEUE_CREATE_PREDEFINED(sample_buffer,  4, sample_q);
 
 int main
   (void)
 {
+  enum pc_packet_status status;
+
   setup();                                     /* system setup */
   usci_setup(USCI_CHANNEL_A0, USCI_MODE_RS232, /* channel A, serial/RS232 mode */
              1000000/9600,                     /* 9600 baud using 1 MHz ref clock */
              UCA0RXIE);                        /* receive interrupts enabled */
-
-  P1DIR = 0x01;
-//  while(1);
-
   adc_setup(control.channels, 1);
-
 
   while (ADC10CTL1 & BUSY);
   ADC10DTC0  = 0;
@@ -90,11 +88,54 @@ int main
   while(1)
   {
     __bis_SR_register(LPM0_bits | GIE);       /* enter low power mode 0 */
-                                                /* with interrupts on */
-    while (!RING_QUEUE_EMPTY(sample_q))
+                                              /* with interrupts on */
+    /* TX state machine
+     * The state cannot change in response to a TXed packet. 
+     */
+    switch((const enum state)control.state)
     {
-      build_mcu_packet(&mcu_packet, DATA);
-      send_mcu_packet(&mcu_packet);
+      case STATE_STREAM:
+      {
+        while (!RING_QUEUE_EMPTY(sample_q))
+        {
+          build_mcu_packet(&mcu_packet, DATA, control.channels);
+          send_mcu_packet(&mcu_packet);
+        }
+        break;
+      }
+      default:
+      {
+        break;
+      }
+    }
+
+    /* RX state machine */
+    while (control.pc_packets--)
+    {
+      status = process_pc_packet(&pc_packet);
+      switch(control.state)
+      {
+        case STATE_IDLE:
+        {
+          if (status == PC_PACKET_BEGIN)
+          {
+            control.state = STATE_STREAM;
+          }
+          break;
+        }
+        case STATE_STREAM:
+        {
+          if (status == PC_PACKET_HALT)
+          {
+            control.state = STATE_IDLE;
+          }
+          break;
+        }
+        default:
+        {
+          break;
+        }
+      }
     }
   }
 

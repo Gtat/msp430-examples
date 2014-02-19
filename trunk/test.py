@@ -7,20 +7,28 @@ import crcmod
 
 BYTES_PER_INCOMING_PACKET = 8
 
-def main(serial_path):
-  try:
-    ser = serial.Serial()
-    ser.port     = serial_path
-    ser.baudrate = 9600
- 
-    ser.open()
-    if ser.isOpen():
-      print '%s open' % ser.name
-    else:
-      return
+def send_packet(port, checker, *args):
+  packet = struct.pack('BBB', *args)
+  check  = struct.pack('B', checker(packet))
+  port.write(packet + check)
 
-    buf = collections.deque()
-    crc = crcmod.mkCrcFun(0x107)
+def main(serial_path):
+  buf = collections.deque()
+  crc = crcmod.mkCrcFun(0x107)
+    
+  ser = serial.Serial()
+  ser.port     = serial_path
+  ser.baudrate = 9600
+ 
+  ser.open()
+  if ser.isOpen():
+    print '%s open' % ser.name
+  else:
+    return
+
+  try:
+    # DUMP message
+    send_packet(ser, crc, 0, 0, 0)
 
     while True:
       buf.appendleft(ser.read())
@@ -40,6 +48,8 @@ def main(serial_path):
 
   except KeyboardInterrupt:
     print '^C'
+    # HALT message
+    send_packet(ser, crc, 0x70, 0, 0)
     return
   
 
