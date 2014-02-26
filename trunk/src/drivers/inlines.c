@@ -19,25 +19,51 @@ static inline void setup
 }
 
 /**
+ * Set up the universal serial communication interface (USCI) as
+ * an RS232 or SPI link.
+ *
+ * @param channel     Either USCI_CHANNEL_A0 or USCI_CHANNEL_B0.
+ * @param mode        Either USCI_MODE_RS232 or USCI_MODE_SPI.
+ * @param rateDivider The division factor against the master clock.
+ * @param mask        The bits to set in interrupt register IE2.
+ *
+ * @return        Zero on success.
+ */
+static inline void usci_setup
+  (void)
+  __attribute__((always_inline));
+
+static inline void usci_setup
+  (void)
+{
+  UCA0CTL1 |=  UCSWRST;
+
+  UCA0CTL1 |=  UCSSEL_2;     /* use master clock (1 MHz)            */
+  P1SEL     =  BIT1 | BIT2 | BIT4;  /* set port 1 bits 1 and 2 to peripheral mode*/
+  P1SEL2    =  BIT1 | BIT2 | BIT4; 
+
+  UCA0CTL1 &= ~UCSWRST;      /* de-assert USCI reset for channel   */
+}
+
+/**
  * Initial ADC configuration. 
  *
  * @param channels  The number of channels to sample.
  * @param rate      The starting sample rate in Hz.
  */
 static inline void adc_setup 
-  (const uint8_t channels, const uint8_t rate)
+  (const unsigned int channels)
   __attribute__((always_inline));
 
 static inline void adc_setup 
-  (const uint8_t channels, const uint8_t rate)
+  (const unsigned int channels)
 {
     /* SET REF VOLTAGES AND CHANNELS */
   ADC10CTL1 = SHS_1 |                  /* use Timer_A0 */
-//              INCH_5 |
               CONSEQ_3 |               /* repeat sequence of channels */
-              (((channels-1) & 0xF)*0x1000u); /* sequence through the requested */
+              (((channels-1) & 0xF)*0x1000u); 
+                                       /* sequence through the requested */
                                        /* number of channels */
-
   ADC10CTL0 = SREF_0 |
               ADC10SHT_3 |             /* sample and hold for 64 clocks */
               ADC10ON |                /* ADC on */
@@ -51,8 +77,6 @@ static inline void adc_setup
   TACCTL0 &= ~CCIE;                    /* disable timer Interrupt */
   __disable_interrupt();
 
-  ADC10AE0   = 0xFFFF >> (16-channels) & ~0x7;            /* analog inputs on */
-  
   /* SET TIMER PWM FOR ADC10 TRIGGER! */
   TACCTL1 = OUTMOD_3;                  /* When counter == TACCR1, set output. */
                                        /* When counter == TACCR0, clear output. */
@@ -62,5 +86,8 @@ static inline void adc_setup
           MC_1 |                       /* Count up */
           ID_3;                        /* divide clock by 8 */
 
+  while (ADC10CTL1 & BUSY);
+  ADC10DTC0  = 0;
+  ADC10DTC1  = channels;
 }
 

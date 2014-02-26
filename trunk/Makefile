@@ -1,14 +1,15 @@
 TARGET     = iegas
 MCU        = msp430g2553
 
-SOURCES  = main.c usci.c protocol.c parameter.c
+SOURCES  = main.c adc.c usci.c protocol.c parameter.c
 VPATH    = src/drivers:src
 BUILDDIR = build/
+ASMDIR   = asm
 INCLUDES = -Iinclude
 ###############################################################################
-CFLAGS   = -mmcu=$(MCU) -g -Wall -Wunused $(INCLUDES) -fshort-enums -O2
-ASFLAGS  = -mmcu=$(MCU) -x assembler-with-cpp -Wa,-gstabs
-LDFLAGS  = -mmcu=$(MCU) -Wl,-Map=$(TARGET).map
+CFLAGS   = -mmcu=$(MCU) -g -Wall -Wunused $(INCLUDES) -fshort-enums -Os 
+ASFLAGS  = -mmcu=$(MCU) -x assembler-with-cpp -Wa,-gstabs 
+LDFLAGS  = -mmcu=$(MCU) -Wl,-Map=$(TARGET).map 
 ###############################################################################
 CC       = msp430-gcc
 LD       = msp430-ld
@@ -26,9 +27,9 @@ CP       = cp -p
 RM       = rm -f
 MV       = mv
 ################################################################################
-OBJECTS = $(SOURCES:.c=.o)
+OBJECTS  = $(SOURCES:.c=.o)
 all: $(TARGET).elf $(TARGET).hex $(TARGET).text Makefile clean
-$(TARGET).elf: $(OBJECTS)
+$(TARGET).elf: $(OBJECTS) 
 	$(CC) $(OBJECTS) $(LDFLAGS) $(LIBS) -o $@
 	$(SIZE) $(TARGET).elf
 
@@ -39,11 +40,9 @@ $(TARGET).elf: $(OBJECTS)
 	@unix2dos $(TARGET).text
 #  The above line is required for the DOS based TI BSL tool to be able to read 
 #  the txt file generated from linux/unix systems.
+
 $(BUILDDIR)/%.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
-
-%.lst: %.c
-	$(CC) -c $(ASFLAGS) -Wa,-anlhd $< > $@
 
 # include the dependencies unless we're going to clean, then forget about them.
 ifneq ($(MAKECMDGOALS), clean)
@@ -56,6 +55,6 @@ endif
 clean:
 	@$(RM) $(OBJECTS)
 #	@$(RM) $(TARGET).*
-	@$(RM) $(SOURCES:.c=.lst)
+#	@$(RM) $(SOURCES:.c=.lst)
 	@$(RM) $(DEPEND)
 

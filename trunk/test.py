@@ -27,15 +27,19 @@ def main(serial_path):
   ser.open()
   if ser.isOpen():
     print '%s open' % ser.name
+    print 'Hit enter to send the next packet'
+    print
   else:
     return
 
   try:
     # SET_RATES to 2 Hz
-    send_packet(ser, crc, 0x60, 0x2c, 0x0a)
+    raw_input()
+    send_packet(ser, crc, 0x50, 0xb0, 0x28)
 
-    # DUMP message
-    send_packet(ser, crc, 0x00, 0, 0)
+    # CAPTURE message
+    raw_input()
+    send_packet(ser, crc, 0x20, 0, 0)
 
     while True:
       buf.appendleft(ser.read())
@@ -56,7 +60,7 @@ def main(serial_path):
   except KeyboardInterrupt:
     print '^C'
     # HALT message
-    send_packet(ser, crc, 0x20, 0, 0)
+    send_packet(ser, crc, 0x30, 0, 0)
     return
   
 

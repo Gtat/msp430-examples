@@ -5,7 +5,7 @@
 #include "drivers/usci.h"
 
 int build_mcu_packet
-  (union mcu_to_pc *p, enum mcu_id id, ...)
+  (union mcu_to_pc * const p, enum mcu_id id, ...)
 {
   va_list ap;
 
@@ -16,10 +16,10 @@ int build_mcu_packet
   {
     case DATA:
     {
-      unsigned int ch;
+      unsigned int ch, byte;
       unsigned int ch_max = va_arg(ap, unsigned int);
        
-      for (ch = 0; ch < ch_max; ++ch)
+      for (ch = byte = 0; ch < ch_max; ++ch)
       {
         p->command.payload.samples[ch] = 
           sample_q.data[sample_q.tail][ch] >> 2;
@@ -55,19 +55,20 @@ int build_mcu_packet
 }
 
 unsigned int send_mcu_packet
-  (union mcu_to_pc *p)
+  (const union mcu_to_pc * const p)
 {
   unsigned int i;
   for (i = 0; i < sizeof(union mcu_to_pc); ++i)
   {
-    putchar(p->bytes[i]);
+    usci_write(p->bytes[i]);
   }
+  usci_commit();
 
   return i;
 }
 
 enum pc_packet_status process_pc_packet
-  (union pc_to_mcu *p)
+  (union pc_to_mcu * const p)
 {
   RING_QUEUE_POP_MANY(incoming_comm_q, p->bytes, sizeof(union pc_to_mcu));
   if (p->command.crc != crc8(p->bytes, sizeof(union pc_to_mcu)-1, CRC8_INIT))
@@ -80,11 +81,16 @@ enum pc_packet_status process_pc_packet
     case DUMP:
     {
       return PC_PACKET_BEGIN;
-      break;
     }
     case CAPTURE:
     {
-      break;
+      usci_set_mode(USCI_MODE_OFF);
+      ADC10SA = (uint16_t)&sample_q.data[sample_q.head];
+      return PC_PACKET_BEGIN;
+    }
+    case HALT:
+    {
+      return PC_PACKET_HALT;
     }
     case SET_VOLTAGE:
     {
@@ -97,11 +103,6 @@ enum pc_packet_status process_pc_packet
     }
     case SET_MARGIN:
     {
-      break;
-    }
-    case HALT:
-    {
-      return PC_PACKET_HALT;
       break;
     }
     default:
@@ -123,7 +124,7 @@ enum pc_packet_status process_pc_packet
  *  @param crc   The input CRC value, typically use 0xFF 
  */
 uint8_t crc8
-  (uint8_t *data, int len, uint8_t crc)
+  (const uint8_t * data, int len, uint8_t crc)
 {
   static const uint8_t table[256] = 
   {

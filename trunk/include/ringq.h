@@ -25,9 +25,9 @@
   struct                                  \
   {                                       \
     type             data[elem_ct];       \
-    uint8_t          head,   tail;        \
-    volatile uint8_t length;              \
-    const uint8_t    depth;               \
+    uint16_t          head,   tail;       \
+    volatile uint16_t length;                      \
+    const uint16_t    depth;              \
   } 
 
 #define RING_QUEUE_DECLARE_GLOBAL(type, elem_ct, name) \

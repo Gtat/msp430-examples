@@ -13,89 +13,56 @@
  * over the USB. This file contains some management code for both of
  * them.
  *
- * SPI setup is not yet implemented.
  */
 
 #include "drivers/usci.h"
+#include "drivers/adc.h"
 #include "ringq.h"
 
-/**
- * Set up the universal serial communication interface (USCI) as
- * an RS232 or SPI link.
- *
- * @param channel     Either USCI_CHANNEL_A0 or USCI_CHANNEL_B0.
- * @param mode        Either USCI_MODE_RS232 or USCI_MODE_SPI.
- * @param rateDivider The division factor against the master clock.
- * @param mask        The bits to set in interrupt register IE2.
- *
- * @return        Zero on success.
- */
-int usci_setup
-  (enum usci_channel channel, enum usci_mode mode, 
-   int rateDivider, int mask)
+void usci_set_mode
+  (enum usci_mode mode)
 {
-
-  switch (channel)
+  UC0IE &= ~(UCA0TXIE | UCA0RXIE);
+  adc_off();
+  switch (mode)
   {
-    case USCI_CHANNEL_A0:
+    case USCI_MODE_SPI:
     {
-      UCA0CTL1 |=  UCSSEL_2;     /* use master clock (1 MHz)            */
-
-      UCA0BR0   =  rateDivider;  /* refer to 19.3.11 in the User Guide, */
-      UCA0BR1   =  0;            /* or use the BAUDRATE macro in usci.h */
-                                 /* for a rough figure                  */
-      P1SEL     =  BIT1 | BIT2;  /* set port 1 bits 1 and 2 to peripheral mode*/
-      P1SEL2    =  BIT1 | BIT2; 
-      if (mode == USCI_MODE_RS232)
-      {
-        UCA0MCTL  =  UCBRS0;     /* RS232 modulation pattern, UG 19-30 */
-      }
-      else  /* SPI mode */
-      {
-        /* 3-pin, 8-bit SPI master, capture on falling edge */
-        UCA0CTL0 |= UCMSB | UCMST | UCSYNC; 
-        UCA0MCTL  = 0;
-
-        /* for SPI on channel A, pin 4 functions as the clock */
-        P1SEL    |= BIT4;
-        P1SEL2   |= BIT4;
-      }
-      UCA0CTL1 &= ~UCSWRST;      /* de-assert USCI reset for channel   */
+      UCA0BR0   = SPI_BAUDRATE_REGVAL;
+      UCA0CTL0 |= UCMSB | UCMST | UCSYNC; 
+      UCA0MCTL  = 0;  
       break;
     }
-    case USCI_CHANNEL_B0:
+    case USCI_MODE_RS232:
     {
-      UCB0CTL1 |=  UCSSEL_2;     /* use master clock (1 MHz)            */
-
-      UCB0BR0   =  rateDivider;  /* refer to 19.3.11 in the User Guide, */
-      UCB0BR1   =  0;            /* or use the BAUDRATE macro in usci.h */
-                                 /* for a rough figure                  */
-      P1SEL     =  BIT6 | BIT7;  /* set port 1 bits 6 and 7 to peripheral mode*/
-      P1SEL2    =  BIT6 | BIT7; 
-      if (mode == USCI_MODE_SPI) /* SPI mode */
-      {
-        /* 3-pin, 8-bit SPI master, capture on falling edge */
-        UCB0CTL0 |= UCMSB | UCMST | UCSYNC; 
-
-        /* for SPI on channel B, pin 5 functions as the clock */
-        P1SEL    |= BIT5;
-        P1SEL2   |= BIT5;
-      }
-      UCB0CTL1 &= ~UCSWRST;      /* de-assert USCI reset for channel   */
+      UCA0BR0   =  UART_BAUDRATE_REGVAL;
+      UCA0CTL0 &= ~(UCMSB | UCMST | UCSYNC); 
+      UCA0MCTL  =  UCBRS2 | UCBRS0;     /* RS232 modulation pattern, UG 19-30 */
       break;
+    }
+    default:
+    {
+      P1SEL  &= ~(BIT1 | BIT2); 
+      P1SEL2 &= ~(BIT1 | BIT2); 
+
+      adc_on();
+      return; /* don't turn interrupts back on */
     }
   }
-
-  IE2      |=  mask;        /* activate specified interrupts */
-
-  return 0;
+  P1SEL  |= BIT1 | BIT2 | BIT4;
+  P1SEL2 |= BIT1 | BIT2 | BIT4;
+  UC0IE  |= UCA0RXIE;
 }
 
-int putchar
-  (int c)
+void usci_write
+  (uint8_t c)
 {
   RING_QUEUE_PUSH(outgoing_comm_q, c);
-  IE2 |= UCA0TXIE;
-  return 1;
+}
+
+__attribute__((always_inline)) inline void usci_commit
+  (void)
+{
+  UC0IE |= UCA0TXIE;
 }
 

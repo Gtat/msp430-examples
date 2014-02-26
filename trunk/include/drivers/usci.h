@@ -12,26 +12,25 @@
 #include <msp430.h>
 #include "global.h"
 
-#define BAUDRATE(clk, baud) ((clk) / (baud))
-
-enum usci_channel
-{
-  USCI_CHANNEL_A0,
-  USCI_CHANNEL_B0,
-};
+#define UART_BAUDRATE        9600
+#define UART_BAUDRATE_REGVAL (1000000 / UART_BAUDRATE)
+#define SPI_BAUDRATE_REGVAL  0x01
 
 enum usci_mode
 {
   USCI_MODE_RS232,
   USCI_MODE_SPI,
+  USCI_MODE_OFF,
 };
 
-int usci_setup
-  (enum usci_channel channel, enum usci_mode mode, 
-   int rateDivider, int mask);
+void usci_set_mode
+  (enum usci_mode mode);
 
-int putchar
-  (int c);
+void usci_write
+  (uint8_t c);
+
+inline void usci_commit
+  (void);
 
 #endif /* __DRIVERS_USCI_H_GUARD */
 

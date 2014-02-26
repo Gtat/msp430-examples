@@ -29,20 +29,18 @@ union __PACK pc_to_mcu
     /* header byte -- little-endian so leftmost bit "dest" is LSB */
     struct __PACK
     {
-      char flags: 4; 
+      unsigned int flags : 4; 
       /* 3-bit IDs */
       enum pc_id
       { 
-        DUMP        = 0x0,
-        CAPTURE     = 0x1,
-        HALT        = 0x2,
-        SET_VOLTAGE = 0x5,
-        SET_RATES   = 0x6,
-        SET_MARGIN  = 0x7,
-      } id : 3; 
-      char dest : 1; /* 0 for setting MCU parameters */
-                     /* 1 for bits [11:0] to go directly */
-                     /* out the SPI */
+        HELLO       = 0x0,
+        DUMP        = 0x1,
+        CAPTURE     = 0x2,
+        HALT        = 0x3,
+        SET_VOLTAGE = 0x4,
+        SET_RATES   = 0x5,
+        SET_MARGIN  = 0x6,
+      } id : 4; 
     };
 
     union __PACK
@@ -116,10 +114,10 @@ union mcu_to_pc
 }; 
 
 int build_mcu_packet
-  (union mcu_to_pc *p, enum mcu_id id, ...);
+  (union mcu_to_pc * const p, enum mcu_id id, ...);
 
 unsigned int send_mcu_packet
-  (union mcu_to_pc *p);
+  (const union mcu_to_pc * const p);
 
 enum pc_packet_status
 {
@@ -131,12 +129,12 @@ enum pc_packet_status
 };
 
 enum pc_packet_status process_pc_packet
-  (union pc_to_mcu *p);
+  (union pc_to_mcu * const p);
 
 #ifdef  CRC_ENABLED
 #define CRC8_INIT 0xFF
 uint8_t crc8
-  (uint8_t *data, int len, uint8_t crc);
+  (const uint8_t * data, int len, uint8_t crc);
 #endif
 
 #endif /* __PROTOCOL_H_GUARD */

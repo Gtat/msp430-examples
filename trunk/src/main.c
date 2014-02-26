@@ -5,28 +5,6 @@
  *
  * @section DESCRIPTION
  *
- * MSP430 interrupt-driven low-power operation skeleton/example
- *
- * This program sets up interrupts for:
- *   1) when a byte is received over the RS232/serial/USB connection 
- *      (from a terminal)
- *   2) approximately every 16 ms using the watchdog timer peripheral
- * It then enters low power mode 0.
- *
- * When a byte is received over the RS232 connection, it will blink the
- * on-board LED to indicate that the keystroke was received and will buffer
- * the received byte in a simple static queue structure (defined generically
- * in ringq.h). The bytes are switched between upper and lower case before being
- * enqueued as a very simple form of processing.
- *
- * When the timer interrupt occurs, it will check if the queue contains bytes 
- * and wake up the processor if it does.
- *
- * When the processor wakes up, it writes all bytes in the queue to the RS232
- * as output. 
- *
- * Therefore any characters typed into a terminal connected to the running 
- * program should be echoed back a short time later with their case reversed.
  */
 
 #include <msp430.h>
@@ -37,6 +15,7 @@
 #include "protocol.h"
 
 #include "drivers/usci.h"
+#include "drivers/parameter.h"
 
 #include "drivers/inlines.c"
 
@@ -55,7 +34,19 @@ union pc_to_mcu  pc_packet;
 
 /** The big ugly global data passing structure.
  */
-struct control_t control = 
+static struct control_t
+{
+  enum state
+  {
+    STATE_IDLE,
+    STATE_SETUP,
+    STATE_STREAM,
+  } state;
+
+  volatile uint8_t pc_packets;
+
+  const    uint16_t channels;
+} control = 
   { 
     .state    = STATE_IDLE,
     .channels = NUM_SIGNAL_CHS,
@@ -74,20 +65,14 @@ int main
   enum pc_packet_status status;
 
   setup();                                     /* system setup */
-  usci_setup(USCI_CHANNEL_A0, USCI_MODE_RS232, /* channel A, serial/RS232 mode */
-             1000000/9600,                     /* 9600 baud using 1 MHz ref clock */
-             UCA0RXIE);                        /* receive interrupts enabled */
-  adc_setup(control.channels, 1);
- 
+  usci_setup();
+
+  adc_setup(NUM_TOTAL_CHS);
+
+  //set_voltage(DEFAULT_DAC_WORD);
   P1DIR = 0x01;
   P1OUT = 0x00;
-
-  while (ADC10CTL1 & BUSY);
-  ADC10DTC0  = 0;
-  ADC10DTC1  = control.channels;
-  ADC10CTL0 |= ENC;
-  ADC10SA    = (uint16_t)&sample_q.data[sample_q.head];
-  
+  usci_set_mode(USCI_MODE_RS232);
   while(1)
   {
     __bis_SR_register(LPM0_bits | GIE);       /* enter low power mode 0 */
@@ -113,7 +98,7 @@ int main
     }
 
     /* RX state machine */
-    while (control.pc_packets--)
+    for ( ; control.pc_packets > 0; --control.pc_packets)
     {
       status = process_pc_packet(&pc_packet);
       switch(control.state)
@@ -123,6 +108,7 @@ int main
           if (status == PC_PACKET_BEGIN)
           {
             control.state = STATE_STREAM;
+    //        ADC10SA    = (uint16_t)&sample_q.data[sample_q.head];
           }
           break;
         }

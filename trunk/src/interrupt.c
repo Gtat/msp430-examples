@@ -1,26 +1,36 @@
 #pragma vector=USCIAB0TX_VECTOR
-__interrupt void USCI_tx_isr
+__interrupt void usci_tx_isr
   (void)
 {
-  if (!RING_QUEUE_EMPTY(outgoing_comm_q))
-  {
-    UCA0TXBUF = RING_QUEUE_POP(outgoing_comm_q); 
-  } 
-  else
+  UCA0TXBUF = RING_QUEUE_POP(outgoing_comm_q); 
+  if (RING_QUEUE_EMPTY(outgoing_comm_q))
   {
     IE2 &= ~UCA0TXIE;
   }
 }
 
 #pragma vector=USCIAB0RX_VECTOR
-__interrupt void USCI_rx_isr
+__interrupt void usci_rx_isr
   (void)
 {
-  RING_QUEUE_PUSH(incoming_comm_q, UCA0RXBUF); 
-  if (incoming_comm_q.length >= sizeof(union pc_to_mcu))
+  char dummy;
+  if (UCA0CTL0 & UCSYNC) /* SPI mode */
   {
-    control.pc_packets++;
-    __bic_SR_register_on_exit(LPM0_bits);
+    dummy = UCA0RXBUF;
+    if (RING_QUEUE_EMPTY(outgoing_comm_q))
+    {
+      __bic_SR_register_on_exit(LPM0_bits);
+    }
+  }
+  else
+  {
+    RING_QUEUE_PUSH(incoming_comm_q, UCA0RXBUF); 
+    if (incoming_comm_q.length >= sizeof(union pc_to_mcu))
+    {
+      P1OUT ^= 0x01;
+      control.pc_packets++;
+      __bic_SR_register_on_exit(LPM0_bits);
+    }
   }
 }
 
@@ -30,6 +40,7 @@ __interrupt void ADC10_isr
 {
   RING_QUEUE_PUSH_NO_DATA(sample_q);
   ADC10SA = (uint16_t)&sample_q.data[sample_q.head];
+
   __bic_SR_register_on_exit(LPM0_bits);
 }
 
