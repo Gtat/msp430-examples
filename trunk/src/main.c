@@ -67,11 +67,9 @@ int main
   setup();                                     /* system setup */
   usci_setup();
 
-  adc_setup(NUM_TOTAL_CHS);
+  adc_setup(NUM_SIGNAL_CHS);//NUM_TOTAL_CHS);
 
   //set_voltage(DEFAULT_DAC_WORD);
-  P1DIR = 0x01;
-  P1OUT = 0x00;
   usci_set_mode(USCI_MODE_RS232);
   while(1)
   {
@@ -108,7 +106,6 @@ int main
           if (status == PC_PACKET_BEGIN)
           {
             control.state = STATE_STREAM;
-    //        ADC10SA    = (uint16_t)&sample_q.data[sample_q.head];
           }
           break;
         }

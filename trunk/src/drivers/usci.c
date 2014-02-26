@@ -23,11 +23,11 @@ void usci_set_mode
   (enum usci_mode mode)
 {
   UC0IE &= ~(UCA0TXIE | UCA0RXIE);
-  adc_off();
   switch (mode)
   {
     case USCI_MODE_SPI:
     {
+      adc_off();
       UCA0BR0   = SPI_BAUDRATE_REGVAL;
       UCA0CTL0 |= UCMSB | UCMST | UCSYNC; 
       UCA0MCTL  = 0;  
@@ -35,6 +35,7 @@ void usci_set_mode
     }
     case USCI_MODE_RS232:
     {
+      adc_off();
       UCA0BR0   =  UART_BAUDRATE_REGVAL;
       UCA0CTL0 &= ~(UCMSB | UCMST | UCSYNC); 
       UCA0MCTL  =  UCBRS2 | UCBRS0;     /* RS232 modulation pattern, UG 19-30 */
@@ -42,8 +43,8 @@ void usci_set_mode
     }
     default:
     {
-      P1SEL  &= ~(BIT1 | BIT2); 
-      P1SEL2 &= ~(BIT1 | BIT2); 
+      P1SEL  &= ~(BIT1 | BIT2 | BIT4); 
+      P1SEL2 &= ~(BIT1 | BIT2 | BIT4); 
 
       adc_on();
       return; /* don't turn interrupts back on */

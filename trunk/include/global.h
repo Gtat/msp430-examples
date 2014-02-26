@@ -3,7 +3,6 @@
 
 #define NUM_SIGNAL_CHS (6)
 #define NUM_TOTAL_CHS  (8)
-#define ADC_CH_MASK    (0xCF)
 
 #include <msp430.h>
 #include "ringq.h"

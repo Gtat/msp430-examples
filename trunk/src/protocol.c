@@ -48,8 +48,9 @@ int build_mcu_packet
   va_end(ap);
 
 #ifdef CRC_ENABLED
-  /* don't CRC the CRC */
-  p->command.crc = crc8(p->bytes, sizeof(union mcu_to_pc)-1, CRC8_INIT);
+  p->command.crc = crc8(p->bytes, 
+                        sizeof(union mcu_to_pc)-1, /* don't CRC the CRC */
+                        CRC8_INIT);
 #endif
   return 0;
 }
@@ -62,7 +63,6 @@ unsigned int send_mcu_packet
   {
     usci_write(p->bytes[i]);
   }
-  usci_commit();
 
   return i;
 }
@@ -85,7 +85,6 @@ enum pc_packet_status process_pc_packet
     case CAPTURE:
     {
       usci_set_mode(USCI_MODE_OFF);
-      ADC10SA = (uint16_t)&sample_q.data[sample_q.head];
       return PC_PACKET_BEGIN;
     }
     case HALT:
