@@ -19,6 +19,12 @@
 #include "drivers/adc.h"
 #include "ringq.h"
 
+/**
+ * Reconfigure the USCI module for use as a 3-wire SPI master,
+ * an RS232 UART, or inactive (held in reset).
+ *
+ * @param mode  USCI_MODE_SPI, USCI_MODE_RS232, or USCI_MODE_OFF.
+ */
 void usci_set_mode
   (enum usci_mode mode)
 {
@@ -46,9 +52,8 @@ void usci_set_mode
     {
       P1SEL  &= ~(BIT1 | BIT2 | BIT4); 
       P1SEL2 &= ~(BIT1 | BIT2 | BIT4); 
-
       adc_on();
-      return; /* don't turn interrupts back on */
+      return; /* don't turn interrupts back on, hold in reset */
     }
   }
   UCA0CTL1 &= ~UCSWRST;
@@ -62,12 +67,22 @@ void usci_set_mode
   UC0IE  |= UCA0RXIE;
 }
 
+/**
+ * Add a byte to the outgoing data queue. No data will be written until 
+ * usci_commit() is called.
+ *
+ * @param c  The byte to write out.
+ */
 void usci_write
   (uint8_t c)
 {
   RING_QUEUE_PUSH(outgoing_comm_q, c);
 }
 
+/**
+ * Begin transmitting all enqueued bytes to the USCI using the currently
+ * selected mode.
+ */
 __attribute__((always_inline)) inline void usci_commit
   (void)
 {

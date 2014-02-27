@@ -5,6 +5,12 @@
  *
  * @section DESCRIPTION
  *
+ * The Intelligent Electrochemical Gas Analysis System's microcontroller
+ * software platform. The software is interrupt-driven, so this file only
+ * performs setup of peripherals and data structures, then falls into a
+ * state machine loop. It sleeps between iterations of the state machine
+ * and only wakes up to construct outgoing packets or parse incoming packets
+ * for configuration information.
  */
 
 #include <msp430.h>
@@ -56,6 +62,7 @@ int main
   adc_setup(NUM_SIGNAL_CHS);
 
   set_voltage(DEFAULT_DAC_WORD);
+  P1DIR |= 0x40;
   usci_set_mode(USCI_MODE_RS232);
 
   while(1)
@@ -71,7 +78,7 @@ int main
       {
         while (!RING_QUEUE_EMPTY(sample_q))
         {
-          build_mcu_packet(&mcu_packet, DATA, control.channels);
+          build_mcu_packet(&mcu_packet, DATA);
           send_mcu_packet(&mcu_packet);
         }
         break;
@@ -100,35 +107,9 @@ int main
         }
         default: 
         {
-          control.state = STATE_IDLE;
           break;
         }
       }
-#if 0
-      switch (control.state)
-      {
-        case STATE_IDLE:
-        {
-          if (status == PC_PACKET_BEGIN)
-          {
-            control.state = STATE_STREAM;
-          }
-          break;
-        }
-        case STATE_STREAM:
-        {
-          if (status == PC_PACKET_HALT)
-          {
-            control.state = STATE_IDLE;
-          }
-          break;
-        }
-        default:
-        {
-          break;
-        }
-      }
-#endif
     }
   }
 

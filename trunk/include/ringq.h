@@ -30,6 +30,18 @@
     const uint16_t    depth;              \
   } 
 
+/** \def RING_QUEUE_DECLARE_GLOBAL(type, elem_ct, name)
+ *  Generate the declaration for a FIFO structure and make an extern 
+ *  declaration of such a structure with the given name. This allows a ring
+ *  queue to be defined once (for instance in main.c) and used in many files.
+ *  Such a queue has NOT BEEN DEFINED YET and RING_QUEUE_CREATE_PREDEFINED() 
+ *  must be called elsewhere before other ring queue operations can be 
+ *  performed.
+ *
+ *  @param type    The type of elements in the FIFO.
+ *  @param elem_ct The maximum number of elements in the FIFO.
+ *  @param name    The identifier name for the declared FIFO.
+ */
 #define RING_QUEUE_DECLARE_GLOBAL(type, elem_ct, name) \
   extern typeof(RING_QUEUE_DECLARE(type, elem_ct)) name
 
@@ -56,11 +68,18 @@
 #define RING_QUEUE_CREATE(type, elem_ct, name) \
   RING_QUEUE_DECLARE(type, elem_ct) name = RING_QUEUE_INIT(elem_ct)
 
+/** \def RING_QUEUE_CREATE_PREDEFINED(type, elem_ct, name)
+ *  Define and initialize a ring queue that was already declared elsewhere.
+ *  Used for sharing ring queues between files with RING_QUEUE_DECLARE_GLOBAL().
+ *
+ *  @param type    The type of elements in the FIFO.
+ *  @param elem_ct The maximum number of elements in the FIFO.
+ *  @param name    The identifier name for the created FIFO, which must 
+ *                 already be defined.
+ */
 #define RING_QUEUE_CREATE_PREDEFINED(type, elem_ct, name) \
   typeof(name) name = RING_QUEUE_INIT(elem_ct)
 
-#define RING_QUEUE_ARRAY_CREATE(type, width, elem_ct, name) \
-  RING_QUEUE_CREATE(typeof(uint16_t _[sizeof(type*width)/2]), elem_ct, name)
 
 /** \def RING_QUEUE_EMPTY(q)
  *  Check if the given FIFO is empty.
@@ -72,6 +91,16 @@
 #define RING_QUEUE_EMPTY(q) \
   (!q.length)
 
+/** \def RING_QUEUE_NOT_FULL(q)
+ *  Check if the given FIFO is not full.
+ *
+ *  @param  q  The FIFO to examine.
+ *  @retval 0  The queue is full.
+ *  @retval 1  The queue is not full.
+ */
+#define RING_QUEUE_NOT_FULL(q) \
+  (q.length < q.depth)
+
 /** \def RING_QUEUE_FULL(q)
  *  Check if the given FIFO is full.
  *
@@ -79,9 +108,6 @@
  *  @retval 0  The queue is not full.
  *  @retval 1  The queue is full.
  */
-#define RING_QUEUE_NOT_FULL(q) \
-  (q.length < q.depth)
-
 #define RING_QUEUE_FULL(q) \
   (!RING_QUEUE_NOT_FULL(q))
 
@@ -99,6 +125,13 @@
     q.head       = (q.head + 1) & (q.depth - 1); \
   } while (0)
 
+/** \def RING_QUEUE_PUSH_NO_DATA(q)
+ *  Update the pointers and length of a ring queue as if an element were added,
+ *  but do not actually copy any data. This allows data to be copied by other
+ *  means (such as DMA) into a slot in the queue.
+ *
+ *  @param q    The FIFO to manipulate, created with RING_QUEUE_CREATE().
+ */
 #define RING_QUEUE_PUSH_NO_DATA(q)           \
   do                                         \
   {                                          \
@@ -142,6 +175,14 @@
      ret;                                   \
   }) 
 
+/** \def RING_QUEUE_POP_NO_DATA(q)
+ *  Update the pointers and length of a ring queue as if an element were 
+ *  removed, but do not actually copy any data. This allows data to be
+ *  accessed in-place, which is useful when the queue consists of array
+ *  elements.
+ *
+ *  @param q    The FIFO to manipulate, created with RING_QUEUE_CREATE().
+ */
 #define RING_QUEUE_POP_NO_DATA(q)            \
   do                                         \
   {                                          \
@@ -171,10 +212,20 @@
     __ret;                              \
   })
 
+/** \def RING_QUEUE_POP_MANY(q, dest, count)
+ *  Pop several elements from the given FIFO into an existing memory location.
+ *  This can be more efficient for flattening a queue into a linear segment of
+ *  memory than popping the elements individually with the RING_QUEUE_POP() 
+ *  macro.
+ *
+ *  @param  q    The FIFO to manipulate, created with RING_QUEUE_CREATE()
+ *  .
+ *  @return      The number of elements that were successfully removed.
+ */
 #define RING_QUEUE_POP_MANY(q, dest, count)  \
   ({                                         \
     size_t i, limit;                         \
-    __typeof(q.data[0]) *__p;                  \
+    __typeof(q.data[0]) *__p;                \
                                              \
     __p   = (dest);                          \
     limit = (count);                         \
@@ -188,7 +239,6 @@
     }                                        \
     i;                                       \
   })
-
 
 #endif /* __RINGQ_H_GUARD */
 

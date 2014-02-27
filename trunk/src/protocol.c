@@ -1,3 +1,12 @@
+/**
+ * @file    protocol.c
+ * @author  Sam Boling <charles.samuel.boling@gmail.com>
+ * @version 0.1
+ *
+ * @section DESCRIPTION
+ *
+ * Protocol-level routines for communicating with the PC.
+ */
 #include <stdarg.h>
 
 #include "protocol.h"
@@ -5,7 +14,15 @@
 #include "drivers/parameter.h"
 #include "drivers/usci.h"
 
-int build_mcu_packet
+/**
+ * Construct a packet to send to the PC of the given type in-place at the
+ * given address. 
+ *
+ * @param p   where the packet is located
+ * @param id  the type/ID of the packet
+ * @param ... additional parameters specific to the packet type
+ */
+void build_mcu_packet
   (union mcu_to_pc * const p, enum mcu_id id, ...)
 {
   va_list ap;
@@ -18,10 +35,7 @@ int build_mcu_packet
   {
     case DATA:
     {
-      unsigned int byte;
-      unsigned int ch_max = va_arg(ap, unsigned int);
-       
-      for (index = byte = 0; index < ch_max; ++index)
+      for (index = 0; index < NUM_SIGNAL_CHS; ++index)
       {
         p->command.payload.samples[index] = 
           sample_q.data[sample_q.tail][index] >> 2;
@@ -64,9 +78,15 @@ int build_mcu_packet
                         sizeof(union mcu_to_pc)-1, /* don't CRC the CRC */
                         CRC8_INIT);
 #endif
-  return 0;
 }
 
+/**
+ * Transmit a given packet to the USCI. The mode should be previously selected
+ * as USCI_MODE_RS232 for this to behave as expected.
+ *
+ * @param p  address of the packet to be sent
+ * @returns  the number of bytes committed
+ */
 unsigned int send_mcu_packet
   (const union mcu_to_pc * const p)
 {
@@ -80,6 +100,10 @@ unsigned int send_mcu_packet
   return i;
 }
 
+/**
+ * Parse a receieved packet from the PC and use its contents to set new 
+ * operation parameters for the system.
+ */
 enum pc_packet_status process_pc_packet
   (union pc_to_mcu * const p)
 {

@@ -1,3 +1,14 @@
+/**
+ * @file    global.h
+ * @author  Sam Boling <charles.samuel.boling@gmail.com>
+ * @version 0.1
+ *
+ * @section DESCRIPTION
+ *
+ * Global definitions and configuration parameters. Ring queues are
+ * declared here using a special macro so they will be visible to every
+ * source file.
+ */
 #ifndef __GLOBAL_H_GUARD
 #define __GLOBAL_H_GUARD
 

@@ -2,13 +2,10 @@
  *  @author  Sam Boling <charles.samuel.boling@gmail.com>
  *  @version 0.1
  *
- *  Explicit definition of iEGAS command formats. 
- *  Note that bitfields are listed in reverse 
- *  order from the spec -- this is how the 
- *  toolchain chooses to interpret their ordering.
- *  The iEGAS System Operating Specifications is
- *  definitive and uses unambiguous Verilog-style
- *  bit formatting.
+ *  Explicit definition of iEGAS command formats. Note that bitfields are listed
+ *  in reverse order from the spec -- this is how the toolchain chooses to 
+ *  interpret their ordering. The iEGAS System Operating Specifications document
+ *  is definitive and uses unambiguous Verilog-style bit formatting.
  */
 #ifndef __PROTOCOL_H_GUARD
 #define __PROTOCOL_H_GUARD
@@ -113,7 +110,7 @@ union mcu_to_pc
   uint8_t bytes[sizeof(struct mcu_to_pc_format_t)];
 }; 
 
-int build_mcu_packet
+void build_mcu_packet
   (union mcu_to_pc * const p, enum mcu_id id, ...);
 
 unsigned int send_mcu_packet
