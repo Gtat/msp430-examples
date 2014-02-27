@@ -16,7 +16,7 @@ def send_packet(port, checker, *args):
   print
   port.write(packet + check)
 
-def parse_packet(ser):
+def parse_packet(ser, buf, crc):
   buf.appendleft(ser.read())
 
   if len(buf) >= BYTES_PER_INCOMING_PACKET:
@@ -58,8 +58,8 @@ def main(serial_path):
     send_packet(ser, crc, 0x20, 0, 0)
 
     while True:
-      print hex(ord(ser.read(1)))
-      #parse_packet(ser)
+#      print hex(ord(ser.read(1)))
+      parse_packet(ser, buf, crc)
 
   except KeyboardInterrupt:
     print '^C'
@@ -69,4 +69,4 @@ def main(serial_path):
   
 
 if __name__ == '__main__':
-  main('/dev/ttyACM0')
+  main('/dev/ttyACM1')

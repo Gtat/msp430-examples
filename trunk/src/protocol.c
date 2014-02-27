@@ -1,6 +1,7 @@
 #include <stdarg.h>
 
 #include "protocol.h"
+#include "drivers/adc.h"
 #include "drivers/parameter.h"
 #include "drivers/usci.h"
 
@@ -8,6 +9,7 @@ int build_mcu_packet
   (union mcu_to_pc * const p, enum mcu_id id, ...)
 {
   va_list ap;
+  unsigned int index;
 
   p->command.id = id;
 
@@ -16,13 +18,13 @@ int build_mcu_packet
   {
     case DATA:
     {
-      unsigned int ch, byte;
+      unsigned int byte;
       unsigned int ch_max = va_arg(ap, unsigned int);
        
-      for (ch = byte = 0; ch < ch_max; ++ch)
+      for (index = byte = 0; index < ch_max; ++index)
       {
-        p->command.payload.samples[ch] = 
-          sample_q.data[sample_q.tail][ch] >> 2;
+        p->command.payload.samples[index] = 
+          sample_q.data[sample_q.tail][index] >> 2;
         RING_QUEUE_POP_NO_DATA(sample_q);
       }
 
@@ -30,6 +32,16 @@ int build_mcu_packet
     }
     case RETRY:
     {
+      char * ptr = va_arg(ap, char *);
+      
+      for (index = 0; index < sizeof(union pc_to_mcu); ++index)
+      {
+        p->command.payload.samples[index] = ptr[index];
+      }
+      for ( ; index < sizeof(p->command.payload.samples); ++index)
+      {
+        p->command.payload.samples[index] = 0;
+      }
       break;
     }
     case OK:
@@ -63,6 +75,7 @@ unsigned int send_mcu_packet
   {
     usci_write(p->bytes[i]);
   }
+  usci_commit();
 
   return i;
 }
@@ -71,7 +84,9 @@ enum pc_packet_status process_pc_packet
   (union pc_to_mcu * const p)
 {
   RING_QUEUE_POP_MANY(incoming_comm_q, p->bytes, sizeof(union pc_to_mcu));
-  if (p->command.crc != crc8(p->bytes, sizeof(union pc_to_mcu)-1, CRC8_INIT))
+  if (p->command.crc != crc8(p->bytes, 
+                             sizeof(union pc_to_mcu)-1, /* don't CRC the CRC */
+                             CRC8_INIT))
   {
     return PC_PACKET_BAD_CRC;
   }
@@ -80,15 +95,16 @@ enum pc_packet_status process_pc_packet
   {
     case DUMP:
     {
-      return PC_PACKET_BEGIN;
+      break;
     }
     case CAPTURE:
     {
-      usci_set_mode(USCI_MODE_OFF);
+      adc_on();
       return PC_PACKET_BEGIN;
     }
     case HALT:
     {
+      adc_off();
       return PC_PACKET_HALT;
     }
     case SET_VOLTAGE:

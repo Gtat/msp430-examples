@@ -15,5 +15,7 @@ void set_voltage
   __bic_SR_register(GIE);
   usci_set_mode(USCI_MODE_SPI);
   usci_commit();
+  P2OUT |=  0x01; /* DAC enable line, active high */
   __bis_SR_register(LPM0_bits | GIE);
+  P2OUT &= ~0x01;
 }

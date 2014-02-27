@@ -19,21 +19,6 @@
 
 #include "drivers/inlines.c"
 
-
-/**
- * Write 1 or 0 bytes to the terminal.
- *
- * @param c The byte to write as an integer.
- *
- * @return  The number of bytes written.
- */
-
-
-union mcu_to_pc mcu_packet;
-union pc_to_mcu  pc_packet;
-
-/** The big ugly global data passing structure.
- */
 static struct control_t
 {
   enum state
@@ -58,6 +43,8 @@ static struct control_t
 RING_QUEUE_CREATE_PREDEFINED(uint8_t,       16, incoming_comm_q);
 RING_QUEUE_CREATE_PREDEFINED(uint8_t,       16, outgoing_comm_q);
 RING_QUEUE_CREATE_PREDEFINED(sample_buffer,  4, sample_q);
+union mcu_to_pc mcu_packet;
+union pc_to_mcu  pc_packet;
 
 int main
   (void)
@@ -65,12 +52,12 @@ int main
   enum pc_packet_status status;
 
   setup();                                     /* system setup */
-  usci_setup();
 
-  adc_setup(NUM_SIGNAL_CHS);//NUM_TOTAL_CHS);
+  adc_setup(NUM_SIGNAL_CHS);
 
-  //set_voltage(DEFAULT_DAC_WORD);
+  set_voltage(DEFAULT_DAC_WORD);
   usci_set_mode(USCI_MODE_RS232);
+
   while(1)
   {
     __bis_SR_register(LPM0_bits | GIE);       /* enter low power mode 0 */
@@ -78,7 +65,7 @@ int main
     /* TX state machine
      * The state cannot change in response to a TXed packet. 
      */
-    switch((const enum state)control.state)
+    switch ((const enum state)control.state)
     {
       case STATE_STREAM:
       {
@@ -99,7 +86,26 @@ int main
     for ( ; control.pc_packets > 0; --control.pc_packets)
     {
       status = process_pc_packet(&pc_packet);
-      switch(control.state)
+      switch (status)
+      {
+        case PC_PACKET_BEGIN:
+        {
+          control.state = STATE_STREAM;
+          break;
+        }
+        case PC_PACKET_HALT:
+        {
+          control.state = STATE_IDLE;
+          break;
+        }
+        default: 
+        {
+          control.state = STATE_IDLE;
+          break;
+        }
+      }
+#if 0
+      switch (control.state)
       {
         case STATE_IDLE:
         {
@@ -122,6 +128,7 @@ int main
           break;
         }
       }
+#endif
     }
   }
 

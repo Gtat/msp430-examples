@@ -22,12 +22,14 @@
 void usci_set_mode
   (enum usci_mode mode)
 {
-  UC0IE &= ~(UCA0TXIE | UCA0RXIE);
+  while(!(IFG2 & UCA0TXIFG));
+  UCA0CTL1 |= UCSWRST;
+  UCA0CTL1 |= UCSSEL_2;
+
   switch (mode)
   {
     case USCI_MODE_SPI:
     {
-      adc_off();
       UCA0BR0   = SPI_BAUDRATE_REGVAL;
       UCA0CTL0 |= UCMSB | UCMST | UCSYNC; 
       UCA0MCTL  = 0;  
@@ -35,7 +37,6 @@ void usci_set_mode
     }
     case USCI_MODE_RS232:
     {
-      adc_off();
       UCA0BR0   =  UART_BAUDRATE_REGVAL;
       UCA0CTL0 &= ~(UCMSB | UCMST | UCSYNC); 
       UCA0MCTL  =  UCBRS2 | UCBRS0;     /* RS232 modulation pattern, UG 19-30 */
@@ -50,8 +51,14 @@ void usci_set_mode
       return; /* don't turn interrupts back on */
     }
   }
+  UCA0CTL1 &= ~UCSWRST;
   P1SEL  |= BIT1 | BIT2 | BIT4;
   P1SEL2 |= BIT1 | BIT2 | BIT4;
+
+  /* enable line for DAC, active high */
+  P2DIR  |= 0x01;
+  P2OUT   = 0x00;
+
   UC0IE  |= UCA0RXIE;
 }
 
