@@ -43,7 +43,7 @@ void build_mcu_packet
         if ((0x80 >> index) & ADC_CH_MASK)
         {
           p->command.payload.samples[ch] = 
-            sample_q.data[sample_q.tail][index] >> 2; /* convert to 8-bit */
+            (sample_q.data[sample_q.tail][index] & 0x3FF) >> 2; /* convert to 8-bit */
           ++ch;
         }
         RING_QUEUE_POP_NO_DATA(sample_q);
