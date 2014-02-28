@@ -62,7 +62,6 @@ int main
   adc_setup(NUM_SIGNAL_CHS);
 
   set_voltage(DEFAULT_DAC_WORD);
-  P1DIR |= 0x40;
   usci_set_mode(USCI_MODE_RS232);
 
   while(1)

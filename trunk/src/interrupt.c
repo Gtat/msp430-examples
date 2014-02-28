@@ -65,7 +65,6 @@ __interrupt void usci_rx_isr
 __interrupt void adc_isr
   (void)
 {
-  P1OUT ^= 0x40;
   RING_QUEUE_PUSH_NO_DATA(sample_q);
   ADC10SA = (uint16_t)&sample_q.data[sample_q.head];
   __bic_SR_register_on_exit(LPM0_bits);

@@ -35,10 +35,17 @@ void build_mcu_packet
   {
     case DATA:
     {
-      for (index = 0; index < NUM_SIGNAL_CHS; ++index)
+      unsigned int ch;
+      for (ch = index = 0; 
+           (index < NUM_TOTAL_CHS) && (ch < NUM_SIGNAL_CHS); 
+           ++index)
       {
-        p->command.payload.samples[index] = 
-          sample_q.data[sample_q.tail][index] >> 2;
+        if ((0x80 >> index) & ADC_CH_MASK)
+        {
+          p->command.payload.samples[ch] = 
+            sample_q.data[sample_q.tail][index] >> 2; /* convert to 8-bit */
+          ++ch;
+        }
         RING_QUEUE_POP_NO_DATA(sample_q);
       }
 

@@ -28,6 +28,12 @@
 void usci_set_mode
   (enum usci_mode mode)
 {
+  P1SEL   = BIT1 | BIT2 | BIT4;
+  P1SEL2  = BIT1 | BIT2 | BIT4;
+  /* enable line for DAC, active high */
+  P2DIR   = 0x01;
+  P2OUT   = 0x00;
+
   while(!(IFG2 & UCA0TXIFG));
   UCA0CTL1 |= UCSWRST;
   UCA0CTL1 |= UCSSEL_2;
@@ -57,12 +63,6 @@ void usci_set_mode
     }
   }
   UCA0CTL1 &= ~UCSWRST;
-  P1SEL  |= BIT1 | BIT2 | BIT4;
-  P1SEL2 |= BIT1 | BIT2 | BIT4;
-
-  /* enable line for DAC, active high */
-  P2DIR  |= 0x01;
-  P2OUT   = 0x00;
 
   UC0IE  |= UCA0RXIE;
 }
