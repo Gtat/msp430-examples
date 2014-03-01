@@ -18,13 +18,21 @@
 #include <msp430.h>
 #include "ringq.h"
 
+/** \union word
+ *  Data type for prettying up bytewise accesses to an object of 
+ *  native word size.
+ */
 union word
 {
-  int  word;
-  char bytes[2];
+  unsigned int word;
+  uint8_t      bytes[sizeof(unsigned int)];
 };
 
-typedef uint16_t sample_buffer[NUM_SIGNAL_CHS];
+/** \typdef sample_buffer
+ *  The type of an array of captured ADC samples. Capable of holding a sample
+ *  from every channel.
+ */
+typedef uint16_t sample_buffer[NUM_TOTAL_CHS];
 RING_QUEUE_DECLARE_GLOBAL(uint8_t,       16, incoming_comm_q);
 RING_QUEUE_DECLARE_GLOBAL(uint8_t,       16, outgoing_comm_q);
 RING_QUEUE_DECLARE_GLOBAL(sample_buffer,  4, sample_q);
