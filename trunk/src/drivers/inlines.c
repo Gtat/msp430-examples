@@ -22,7 +22,6 @@ static inline void setup
  * Initial ADC configuration. 
  *
  * @param channels  The number of channels to sample.
- * @param rate      The starting sample rate in Hz.
  */
 static inline void adc_setup 
   (const unsigned int channels)
