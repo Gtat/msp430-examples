@@ -64,6 +64,7 @@ int main
   set_voltage(DEFAULT_DAC_WORD);
   usci_set_mode(USCI_MODE_RS232);
 
+
   while(1)
   {
     __bis_SR_register(LPM0_bits | GIE);       /* enter low power mode 0 */

@@ -33,10 +33,7 @@ static inline void adc_setup
     /* SET REF VOLTAGES AND CHANNELS */
   ADC10CTL1 = SHS_1 |                  /* use Timer_A0 */
               CONSEQ_3 |               /* repeat sequence of channels */
-              INCH_7; 
-              //(((channels-1) & 0xF)*0x1000u); 
-                                       /* sequence through the requested */
-                                       /* number of channels */
+              INCH_7;                  /* sequence through all channels */
   ADC10CTL0 = SREF_0 |
               ADC10SHT_3 |             /* sample and hold for 64 clocks */
               ADC10ON |                /* ADC on */
@@ -61,6 +58,6 @@ static inline void adc_setup
 
   while (ADC10CTL1 & BUSY);
   ADC10DTC0  = 0;
-  ADC10DTC1  = NUM_TOTAL_CHS; //channels;
+  ADC10DTC1  = NUM_TOTAL_CHS; 
 }
 
