@@ -1,19 +1,20 @@
 #ifndef __DRIVERS_PARAMETER_H_GUARD
 #define __DRIVERS_PARAMETER_H_GUARD
 
-#include <msp430.h>
-#include "protocol.h"
+#include <stdint.h>
+#include "global.h"
 
 /** 
  *  Configuration format for the TI TLV5620 Quadruple DAC.
  */
 struct dac_word
 {
+  char          channel : 2; /* spacing only, */
+                             /* ch is tracked separately */
   unsigned char range   : 1;
   char                  : 5; /* not used */
-
   uint8_t       data;
-} command;
+};
 
 struct rateinfo
 {

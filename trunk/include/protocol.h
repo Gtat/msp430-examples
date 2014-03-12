@@ -12,6 +12,7 @@
 
 #include <stdint.h>
 #include "global.h"
+#include "drivers/parameter.h"
 
 #define __PACK __attribute__((packed))
 #define CRC_ENABLED
@@ -42,11 +43,7 @@ union __PACK pc_to_mcu
 
     union __PACK
     {
-      struct __PACK
-      {
-        uint8_t dac_header;
-        uint8_t voltage;
-      } dac;
+      struct dac_word dac_setting;
       uint16_t taccr;     /* will overwrite TACCR[15:0] */
     } payload;
 
@@ -55,6 +52,7 @@ union __PACK pc_to_mcu
 
   uint8_t bytes[sizeof(struct pc_to_mcu_format_t)];
 } __attribute__((packed));
+
 
 /** \union mcu_command
  *  The format for messages from the microcontroller.

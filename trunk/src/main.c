@@ -13,15 +13,14 @@
  * for configuration information.
  */
 
-#include <msp430.h>
 #include <stdio.h>
 
 #include "global.h"
 #include "ringq.h"
 #include "protocol.h"
 
-#include "drivers/usci.h"
 #include "drivers/parameter.h"
+#include "drivers/usci.h"
 #include "processing.h"
 
 #include "drivers/inlines.c"
@@ -97,6 +96,7 @@ int main
       {
         case PC_PACKET_BEGIN:
         {
+          set_all_voltages();
           control.state = STATE_STREAM;
           break;
         }
