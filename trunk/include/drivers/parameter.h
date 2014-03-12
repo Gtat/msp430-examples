@@ -4,37 +4,39 @@
 #include <msp430.h>
 #include "protocol.h"
 
-/** \union dac_word
+/** 
  *  Configuration format for the TI TLV5620 Quadruple DAC.
  */
-union dac_word
+struct dac_word
 {
-  struct dac_format_t
-  {
-    unsigned char channel : 2;
-    unsigned char range   : 1;
-    char                  : 5; /* not used */
+  unsigned char range   : 1;
+  char                  : 5; /* not used */
 
-    uint8_t       data;
-  } command;
+  uint8_t       data;
+} command;
 
-  char bytes[sizeof(struct dac_format_t)];
+struct rateinfo
+{
+  uint16_t taccr;
 };
 
-#define DEFAULT_DAC_WORD \
-  ((union dac_word){     \
-    .command = {         \
-      .channel = 2,      \
-      .range = 0,        \
-      .data  = 0xA5,     \
-    },                   \
-  })
+extern struct parameter_t
+{
+  struct dac_word voltages[NUM_SIGNAL_CHS];
+  struct rateinfo rate;
+  uint8_t (*process)
+    (uint16_t sample, void * option);
+  void * processing_option;
+} parameters;
 
 void update_rates
   (char flags, uint16_t taccr);
 
 void set_voltage
-  (union dac_word setting);
+  (uint8_t ch, struct dac_word setting);
+
+void set_all_voltages
+  (void);
 
 #endif  /* __DRIVERS_PARAMETER_H_GUARD */
 

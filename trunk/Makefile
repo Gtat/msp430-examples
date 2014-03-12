@@ -1,11 +1,11 @@
 TARGET     = iegas
 MCU        = msp430g2553
 
-SOURCES  = main.c adc.c usci.c protocol.c parameter.c
+SOURCES  = main.c adc.c usci.c protocol.c parameter.c processing.c
 VPATH    = src/drivers:src
 BUILDDIR = build/
 ASMDIR   = asm
-INCLUDES = -Iinclude
+INCLUDES = -Iinclude 
 ###############################################################################
 CFLAGS   = -mmcu=$(MCU) -g -Wall -Wunused $(INCLUDES) -fshort-enums -Os 
 ASFLAGS  = -mmcu=$(MCU) -x assembler-with-cpp -Wa,-gstabs 

@@ -10,6 +10,7 @@
 #include <stdarg.h>
 
 #include "protocol.h"
+#include "processing.h"
 #include "drivers/adc.h"
 #include "drivers/parameter.h"
 #include "drivers/usci.h"
@@ -40,11 +41,16 @@ void build_mcu_packet
            (index < NUM_TOTAL_CHS) && (ch < NUM_SIGNAL_CHS); 
            ++index)
       {
+        /* if this channel is among the bits marked as in-use */
         if ((0x80 >> index) & ADC_CH_MASK)
         {
-          p->command.payload.samples[ch] = 
-            (sample_q.data[sample_q.tail][index] & 0x3FF) >> 2; /* convert to 8-bit */
-          ++ch;
+          /* populate the next byte of the outgoing DATA packet. */
+          /* first perform the currently configured processing, or */
+          /* truncate to 8 bits by default. */
+          p->command.payload.samples[ch++] = 
+            (*(parameters.process ? : &truncate_sample))
+               (sample_q.data[sample_q.tail][index], /* the channel's sample */
+                parameters.processing_option);       /* optional argument */
         }
         RING_QUEUE_POP_NO_DATA(sample_q);
       }

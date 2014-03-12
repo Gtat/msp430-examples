@@ -69,4 +69,4 @@ def main(serial_path):
   
 
 if __name__ == '__main__':
-  main('/dev/ttyACM1')
+  main('/dev/ttyACM0')

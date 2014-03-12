@@ -22,6 +22,7 @@
 
 #include "drivers/usci.h"
 #include "drivers/parameter.h"
+#include "processing.h"
 
 #include "drivers/inlines.c"
 
@@ -35,12 +36,12 @@ static struct control_t
   } state;
 
   volatile uint8_t pc_packets;
-
   const    uint16_t channels;
 } control = 
   { 
-    .state    = STATE_IDLE,
-    .channels = NUM_SIGNAL_CHS,
+    .state      = STATE_IDLE,
+    .pc_packets = 0,
+    .channels   = NUM_SIGNAL_CHS,
   };
 
 /* declare and initialize a ring queue AKA circular buffer AKA fifo */
@@ -61,9 +62,8 @@ int main
 
   adc_setup(NUM_SIGNAL_CHS);
 
-  set_voltage(DEFAULT_DAC_WORD);
+  set_all_voltages();
   usci_set_mode(USCI_MODE_RS232);
-
 
   while(1)
   {
