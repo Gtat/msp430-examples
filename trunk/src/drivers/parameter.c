@@ -30,7 +30,6 @@ void set_voltage
   usci_write(setting.range | ch);
   usci_write(setting.data);
   __bic_SR_register(GIE);
-  usci_set_mode(USCI_MODE_SPI);
   usci_commit();
   P2OUT |=  0x01; /* DAC enable line, active high */
   __bis_SR_register(LPM0_bits | GIE);
@@ -41,9 +40,11 @@ void set_all_voltages
   (void)
 {
   unsigned int ch;
-//  for (ch = 0; ch < NUM_SIGNAL_CHS; ++ch)
-//  {
-    set_voltage(0, parameters.voltages[0]);
-//  }
+  usci_set_mode(USCI_MODE_SPI);
+  for (ch = 0; ch < NUM_SIGNAL_CHS; ++ch)
+  {
+    set_voltage(ch, parameters.voltages[ch]);
+  }
+  usci_set_mode(USCI_MODE_RS232);
 }
 
