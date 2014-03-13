@@ -47,14 +47,14 @@ static inline void adc_setup
   TACCTL0 &= ~CCIE;                    /* disable timer Interrupt */
   __disable_interrupt();
 
+
   /* SET TIMER PWM FOR ADC10 TRIGGER! */
+  BCSCTL3  = XCAP_3;                   /* oscillator capacitance == 12.5 pF */
   TACCTL1 = OUTMOD_3;                  /* When counter == TACCR1, set output. */
                                        /* When counter == TACCR0, clear output. */
-  TACCR0 = 0xf424 / channels;          /* 62500 * 64 / (16 MHz / 2 / 2) = 1.0 s */
-  TACCR1 = 0xf424 / channels;          /* 50% duty cycle */
-  TACTL = TASSEL_2 |                   /* Source from 16 MHz SMCLK */
-          MC_1 |                       /* Count up */
-          ID_3;                        /* divide clock by 8 */
+  TACTL = TASSEL_1 |                   /* source from 32.768 kHz ACLK */
+          MC_1;                        /* count up */ 
+  update_rates(0, 0x8000 / channels);  /* 32768 / 32.768 kHz = 1.0 s */
 
   while (ADC10CTL1 & BUSY);
   ADC10DTC0  = 0;

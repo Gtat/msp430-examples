@@ -10,9 +10,10 @@
 /** \union dac_word
  *  Configuration format for the TI TLV5620 Quadruple DAC.
  */
-union dac_word
+union __attribute__((packed)) dac_word
+  
 {
-  struct dac_format_t
+  struct __attribute__((packed)) dac_format_t
   {
     uint8_t range   : 1;
     uint8_t channel : 2;
