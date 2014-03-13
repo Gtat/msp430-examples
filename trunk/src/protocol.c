@@ -146,7 +146,7 @@ enum pc_packet_status process_pc_packet
     }
     case SET_VOLTAGE:
     {
-      parameters.voltages[p->command.payload.dac_setting.channel] =
+      parameters.voltages[p->command.payload.dac_setting.formatted.channel] =
         p->command.payload.dac_setting;
       break;
     }

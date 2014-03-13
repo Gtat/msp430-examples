@@ -43,8 +43,8 @@ union __PACK pc_to_mcu
 
     union __PACK
     {
-      struct dac_word dac_setting;
-      uint16_t taccr;     /* will overwrite TACCR[15:0] */
+      union dac_word dac_setting;
+      uint16_t       taccr;     /* will overwrite TACCR[15:0] */
     } payload;
 
     uint8_t crc;

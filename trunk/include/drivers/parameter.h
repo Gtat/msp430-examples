@@ -4,16 +4,22 @@
 #include <stdint.h>
 #include "global.h"
 
-/** 
+
+#define NUM_DAC_CHS 4
+
+/** \union dac_word
  *  Configuration format for the TI TLV5620 Quadruple DAC.
  */
-struct dac_word
+union dac_word
 {
-  char          channel : 2; /* spacing only, */
-                             /* ch is tracked separately */
-  unsigned char range   : 1;
-  char                  : 5; /* not used */
-  uint8_t       data;
+  struct dac_format_t
+  {
+    uint8_t range   : 1;
+    uint8_t channel : 2;
+    char            : 5;
+    uint8_t data;
+  } formatted;
+  uint8_t bytes[sizeof(uint16_t)];
 };
 
 struct rateinfo
@@ -23,7 +29,7 @@ struct rateinfo
 
 extern struct parameter_t
 {
-  struct dac_word voltages[NUM_SIGNAL_CHS];
+  union  dac_word voltages[NUM_DAC_CHS];
   struct rateinfo rate;
   uint8_t (*process)
     (uint16_t sample, void * option);
@@ -34,7 +40,7 @@ void update_rates
   (char flags, uint16_t taccr);
 
 void set_voltage
-  (uint8_t ch, struct dac_word setting);
+  (union dac_word setting);
 
 void set_all_voltages
   (void);

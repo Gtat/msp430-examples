@@ -7,7 +7,7 @@ BUILDDIR = build/
 ASMDIR   = asm
 INCLUDES = -Iinclude 
 ###############################################################################
-CFLAGS   = -mmcu=$(MCU) -g -Wall -Wunused $(INCLUDES) -fshort-enums -Os 
+CFLAGS   = -mmcu=$(MCU) -g -Wall $(INCLUDES) -fshort-enums -Os 
 ASFLAGS  = -mmcu=$(MCU) -x assembler-with-cpp -Wa,-gstabs 
 LDFLAGS  = -mmcu=$(MCU) -Wl,-Map=$(TARGET).map 
 ###############################################################################

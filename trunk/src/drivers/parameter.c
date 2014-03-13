@@ -1,6 +1,6 @@
 #include "drivers/parameter.h"
 #include "drivers/usci.h"
-#include "config.h"
+#include "config/config.h"
 
 
 /**
@@ -25,10 +25,10 @@ inline void update_rates
  *  @param setting channel, range, and voltage information to be written.
  */
 void set_voltage
-  (uint8_t ch, struct dac_word setting)
+  (union dac_word setting)
 {
-  usci_write(setting.range | ch);
-  usci_write(setting.data);
+  usci_write(setting.bytes[0]);
+  usci_write(setting.bytes[1]);
   __bic_SR_register(GIE);
   usci_commit();
   P2OUT |=  0x01; /* DAC enable line, active high */
@@ -43,7 +43,7 @@ void set_all_voltages
   usci_set_mode(USCI_MODE_SPI);
   for (ch = 0; ch < NUM_SIGNAL_CHS; ++ch)
   {
-    set_voltage(ch, parameters.voltages[ch]);
+    set_voltage(parameters.voltages[ch]);
   }
   usci_set_mode(USCI_MODE_RS232);
 }
