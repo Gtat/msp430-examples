@@ -9,7 +9,6 @@
 #ifndef __DRIVERS_USCI_H_GUARD
 #define __DRIVERS_USCI_H_GUARD
 
-#include <msp430.h>
 #include "global.h"
 
 #define UART_BAUDRATE        9600

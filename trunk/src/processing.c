@@ -6,6 +6,7 @@ uint8_t execute_truncate_sample
   return ((sample & 0x3FF) >> 2);
 }
 
+#ifdef include_moving_average
 uint8_t execute_moving_average
   (uint16_t sample, unsigned int ch, struct processor * p)
 {
@@ -15,19 +16,23 @@ uint8_t execute_moving_average
   state = &p->state.moving_average;
   incoming = execute_truncate_sample(sample, ch, NULL);
 
-  state->sum += incoming;
-  state->sum -= state->samples[ch][state->index];
-
+  state->sum[ch] += incoming;
+  state->sum[ch] -= state->samples[ch][state->index];
   state->samples[ch][state->index] = incoming;
-  if (state->index < MOVING_AVG_LENGTH)
+
+  if (ch == NUM_SIGNAL_CHS-1)
   {
-    ++state->index;
-  }
-  else
-  {
-    state->index = 0;
+    if (state->index < MOVING_AVG_LENGTH)
+    {
+      ++state->index;
+    }
+    else
+    {
+      state->index = 0;
+    }
   }
 
-  return (state->sum / MOVING_AVG_LENGTH);
+  return (state->sum[ch] / MOVING_AVG_LENGTH);
 }
+#endif /* include_moving_average */
 

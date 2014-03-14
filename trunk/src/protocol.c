@@ -54,8 +54,8 @@ void build_mcu_packet
                 &parameters.process);       /* optional argument */
           ++ch;
         }
-        RING_QUEUE_POP_NO_DATA(sample_q);
       }
+      RING_QUEUE_POP_NO_DATA(sample_q);
 
       break;
     }

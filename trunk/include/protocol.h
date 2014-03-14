@@ -12,6 +12,7 @@
 
 #include <stdint.h>
 #include "global.h"
+#include "drivers/adc.h"
 #include "drivers/parameter.h"
 
 #define __PACK __attribute__((packed))

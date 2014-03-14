@@ -12,7 +12,6 @@
 #ifndef __GLOBAL_H_GUARD
 #define __GLOBAL_H_GUARD
 
-#define NUM_SIGNAL_CHS (5)
 #define NUM_TOTAL_CHS  (8)
 
 #include <msp430.h>

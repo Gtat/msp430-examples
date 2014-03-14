@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "global.h"
+#include "drivers/adc.h"
 
 union processor_state
 {
@@ -29,7 +30,7 @@ struct processor
   (struct processor)              \
   {                               \
     .execute = &execute_##name,   \
-    .state   = { ##__VA_ARGS__ }, \
+    .state   = { 0 }, \
   }
 
 #endif /* __PROCESSING_H_GUARD */
