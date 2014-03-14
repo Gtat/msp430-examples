@@ -14,7 +14,7 @@
 
 #define UART_BAUDRATE        9600
 #define UART_BAUDRATE_REGVAL (1000000 / UART_BAUDRATE)
-#define SPI_BAUDRATE_REGVAL  0x01
+#define SPI_BAUDRATE_REGVAL  0x06
 
 enum usci_mode
 {

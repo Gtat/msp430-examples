@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "global.h"
+#include "processing.h"
 
 
 #define NUM_DAC_CHS 4
@@ -32,9 +33,7 @@ extern struct parameter_t
 {
   union  dac_word voltages[NUM_DAC_CHS];
   struct rateinfo rate;
-  uint8_t (*process)
-    (uint16_t sample, void * option);
-  void * processing_option;
+  struct processor process;
 } parameters;
 
 void update_rates

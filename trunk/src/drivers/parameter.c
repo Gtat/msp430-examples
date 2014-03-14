@@ -41,7 +41,7 @@ void set_all_voltages
 {
   unsigned int ch;
   usci_set_mode(USCI_MODE_SPI);
-  for (ch = 0; ch < NUM_SIGNAL_CHS; ++ch)
+  for (ch = 0; ch < NUM_DAC_CHS; ++ch)
   {
     set_voltage(parameters.voltages[ch]);
   }

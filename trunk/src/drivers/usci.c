@@ -42,8 +42,9 @@ void usci_set_mode
   {
     case USCI_MODE_SPI:
     {
-      UCA0BR0   = SPI_BAUDRATE_REGVAL;
       UCA0CTL0 |= UCMSB | UCMST | UCSYNC; 
+      UCA0BR0   = SPI_BAUDRATE_REGVAL;
+      UCA0BR1   = 0;
       UCA0MCTL  = 0;  
       break;
     }

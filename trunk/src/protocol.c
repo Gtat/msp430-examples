@@ -47,10 +47,12 @@ void build_mcu_packet
           /* populate the next byte of the outgoing DATA packet. */
           /* first perform the currently configured processing, or */
           /* truncate to 8 bits by default. */
-          p->command.payload.samples[ch++] = 
-            (*(parameters.process ? : &truncate_sample))
+          p->command.payload.samples[ch] = 
+            (*(parameters.process.execute ? : &execute_truncate_sample))
                (sample_q.data[sample_q.tail][index], /* the channel's sample */
-                parameters.processing_option);       /* optional argument */
+                ch,
+                &parameters.process);       /* optional argument */
+          ++ch;
         }
         RING_QUEUE_POP_NO_DATA(sample_q);
       }

@@ -18,8 +18,7 @@
 
 struct parameter_t parameters =
   {
-    .process  = NULL,
-    .processing_option = NULL,
+    .process  = INIT_PROCESSOR(truncate_sample),
     .rate     =
     {
       .taccr = 0xF424,

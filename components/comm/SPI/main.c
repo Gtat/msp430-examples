@@ -123,7 +123,7 @@ int main(void)
 //  P1OUT &= ~BIT5;    //set P1.5 to 1
   __delay_cycles(10);                 // Wait for slave to initialize
 
-  MST_Data = 0x01;                          // Initialize data values
+  MST_Data = 0x00;                          // Initialize data values
 //  SLV_Data = 0x00;
 
 UCA0TXBUF = MST_Data;
@@ -140,7 +140,7 @@ __bis_SR_register(LPM0_bits + GIE);       // CPU off, enable interrupts
 #pragma vector=USCIAB0TX_VECTOR
 __interrupt void USCIA0TX_ISR(void)
 {
- // volatile unsigned int i;
+  static unsigned int i = 0;
 
   //while (!(IFG2 & UCA0TXIFG));              // USCI_A0 TX buffer ready?
   //if (!(IFG2 & UCA0TXIFG));
@@ -150,7 +150,7 @@ __interrupt void USCIA0TX_ISR(void)
   //  P1OUT &= ~BIT0;                         // If incorrect, clear LED
 
   while (!(IFG2 & UCA0TXIFG));
-  MST_Data=0x80;						//Data bits D7~D0.
+  MST_Data  = 0xff;						//Data bits D7~D0.
   UCA0TXBUF = MST_Data;
    while (!(IFG2 & UCA0TXIFG));
    __delay_cycles(40); //
@@ -163,10 +163,13 @@ __interrupt void USCIA0TX_ISR(void)
 
    P1OUT |= BIT5;  // end data load. prepare for next SPI transmission.
    __delay_cycles(10); //
-
-// MST_Data = 0x00;                          // Initialize data values
-
-//  UCA0TXBUF = MST_Data;
+  if (i < 1)
+  {
+    ++i;
+    MST_Data = 0x00;                          // Initialize data values
+    UCA0TXBUF = MST_Data;
+    return;
+  }
                      // Add time between transmissions to
   // make sure slave can keep up
   IE2 &= ~(UCA0TXIE);
