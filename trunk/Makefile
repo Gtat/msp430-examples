@@ -41,19 +41,19 @@ $(TARGET).elf: $(OBJECTS)
 #  The above line is required for the DOS based TI BSL tool to be able to read 
 #  the txt file generated from linux/unix systems.
 
-$(BUILDDIR)/%.o: %.c
+%.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 # include the dependencies unless we're going to clean, then forget about them.
-ifneq ($(MAKECMDGOALS), clean)
-	-include $(DEPEND)
-endif
+#ifneq ($(MAKECMDGOALS), clean)
+#	-include $(DEPEND)
+#endif
 %.d: %.c
 	$(CC) -M ${CFLAGS} $< >$@
 
 .PHONY:	clean
 clean:
-	@$(RM) $(OBJECTS)
+#	@$(RM) $(OBJECTS)
 #	@$(RM) $(TARGET).*
 #	@$(RM) $(SOURCES:.c=.lst)
 	@$(RM) $(DEPEND)
