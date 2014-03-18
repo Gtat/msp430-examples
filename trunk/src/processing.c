@@ -22,7 +22,7 @@ uint8_t execute_moving_average
 
   if (ch == NUM_SIGNAL_CHS-1)
   {
-    if (state->index < MOVING_AVG_LENGTH)
+    if (state->index < MOVING_AVG_LENGTH-1)
     {
       ++state->index;
     }

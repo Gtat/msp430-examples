@@ -54,8 +54,8 @@ def main(serial_path):
 
   try:
     # SET_RATES to 2 Hz
-    raw_input()
-    send_packet(ser, crc, 0x50, 0x99, 0x19)
+#    raw_input()
+#    send_packet(ser, crc, 0x50, 0x99, 0x19)
 
     # CAPTURE message
     raw_input()

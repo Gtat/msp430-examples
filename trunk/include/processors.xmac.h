@@ -1,6 +1,6 @@
 EXPAND_PROCESSOR(truncate_sample, {})
 
-//#define include_moving_average
+#define include_moving_average
 #ifdef include_moving_average
   #define MOVING_AVG_LENGTH 16
   EXPAND_PROCESSOR(moving_average, 

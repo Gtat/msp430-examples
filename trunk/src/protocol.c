@@ -51,7 +51,7 @@ void build_mcu_packet
             (*(parameters.process.execute ? : &execute_truncate_sample))
                (sample_q.data[sample_q.tail][index], /* the channel's sample */
                 ch,
-                &parameters.process);       /* optional argument */
+                &parameters.process);                /* optional argument */
           ++ch;
         }
       }

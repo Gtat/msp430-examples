@@ -61,7 +61,7 @@ int main
 
   adc_setup(NUM_SIGNAL_CHS);
 
-  set_all_voltages();
+//  set_all_voltages();
   usci_set_mode(USCI_MODE_RS232);
 
   while(1)
@@ -96,7 +96,7 @@ int main
       {
         case PC_PACKET_BEGIN:
         {
-          set_all_voltages();
+//          set_all_voltages();
           control.state = STATE_STREAM;
           break;
         }
