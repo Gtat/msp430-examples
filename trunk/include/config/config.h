@@ -18,7 +18,14 @@
 
 struct parameter_t parameters =
   {
-    .process  = INIT_PROCESSOR(moving_average),
+    .process  = 
+    { 
+      #define EXPAND_PROCESSOR(name, decl, init, ...) \
+        .execute = &execute_##name,                   \
+        .state   = { .name = init },                  
+      #include "processors.xmac.h"
+      #undef EXPAND_PROCESSOR
+    },
     .rate     =
     {
       .taccr = 0xF424,

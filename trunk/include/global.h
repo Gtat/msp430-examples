@@ -13,6 +13,7 @@
 #define __GLOBAL_H_GUARD
 
 #define NUM_TOTAL_CHS  (8)
+#define MACRO_COMMA    ,
 
 #include <msp430.h>
 #include "ringq.h"

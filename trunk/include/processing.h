@@ -26,11 +26,4 @@ struct processor
 #include "processors.xmac.h"
 #undef EXPAND_PROCESSOR
 
-#define INIT_PROCESSOR(name, ...) \
-  (struct processor)              \
-  {                               \
-    .execute = &execute_##name,   \
-    .state   = { 0 }, \
-  }
-
 #endif /* __PROCESSING_H_GUARD */
