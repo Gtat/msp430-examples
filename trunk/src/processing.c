@@ -1,5 +1,11 @@
 #include "processing.h"
 
+inline uint8_t execute_nothing
+  (uint16_t sample, unsigned int ch, struct processor *p)
+{
+  return 0;
+}
+
 uint8_t execute_truncate_sample
   (uint16_t sample, unsigned int ch, struct processor * p)
 {
@@ -35,4 +41,19 @@ uint8_t execute_moving_average
   return (state->sum[ch] / MOVING_AVG_LENGTH);
 }
 #endif /* include_moving_average */
+
+#ifdef include_threshold
+uint8_t execute_threshold
+  (uint16_t sample, unsigned int ch, struct processor * p)
+{
+  if (sample > p->state.threshold.thresholds[ch])
+  {
+    return (1 << ch);
+  }
+  else
+  {
+    return 0;
+  }
+}
+#endif
 

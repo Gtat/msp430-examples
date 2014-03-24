@@ -18,14 +18,8 @@
 
 struct parameter_t parameters =
   {
-    .process  = 
-    { 
-      #define EXPAND_PROCESSOR(name, decl, init, ...) \
-        .execute = &execute_##name,                   \
-        .state   = { .name = init },                  
-      #include "processors.xmac.h"
-      #undef EXPAND_PROCESSOR
-    },
+    .process  = INIT_PROCESSOR(truncate_sample),
+    .alarm    = { 0 },
     .rate     =
     {
       .taccr = 0xF424,

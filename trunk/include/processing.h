@@ -5,6 +5,12 @@
 #include "global.h"
 #include "drivers/adc.h"
 
+#define INIT_PROCESSOR(name)                   \
+  {                                            \
+    .execute = &execute_##name,                \
+    .state   = { .name = name##_initializer }, \
+  }
+
 union processor_state
 {
   #define EXPAND_PROCESSOR(name, fields, ...) \

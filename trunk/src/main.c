@@ -55,7 +55,8 @@ union pc_to_mcu  pc_packet;
 int main
   (void)
 {
-  enum pc_packet_status status;
+  enum pc_packet_status packet_status;
+  uint8_t build_status;
 
   setup();                                     /* system setup */
 
@@ -77,7 +78,7 @@ int main
       {
         while (!RING_QUEUE_EMPTY(sample_q))
         {
-          build_mcu_packet(&mcu_packet, DATA);
+          build_status = build_mcu_packet(&mcu_packet, DATA);
           send_mcu_packet(&mcu_packet);
         }
         break;
@@ -91,8 +92,8 @@ int main
     /* RX state machine */
     for ( ; control.pc_packets > 0; --control.pc_packets)
     {
-      status = process_pc_packet(&pc_packet);
-      switch (status)
+      packet_status = process_pc_packet(&pc_packet);
+      switch (packet_status)
       {
         case PC_PACKET_BEGIN:
         {

@@ -23,13 +23,15 @@
  * @param id  the type/ID of the packet
  * @param ... additional parameters specific to the packet type
  */
-void build_mcu_packet
+uint8_t build_mcu_packet
   (union mcu_to_pc * const p, enum mcu_id id, ...)
 {
   va_list ap;
   unsigned int index;
+  uint8_t ret;
 
   p->command.id = id;
+  ret = 0;
 
   va_start(ap, id);
   switch (id)
@@ -52,6 +54,12 @@ void build_mcu_packet
                (sample_q.data[sample_q.tail][index], /* the channel's sample */
                 ch,
                 &parameters.process);                /* optional argument */
+          ret |= 
+            (*(parameters.alarm.execute ? : &execute_nothing))
+              (sample_q.data[sample_q.tail][index], 
+               ch,
+               &parameters.alarm);
+
           ++ch;
         }
       }
@@ -93,6 +101,7 @@ void build_mcu_packet
                         sizeof(union mcu_to_pc)-1, /* don't CRC the CRC */
                         CRC8_INIT);
 #endif
+  return ret;
 }
 
 /**

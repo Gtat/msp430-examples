@@ -109,7 +109,7 @@ union mcu_to_pc
   uint8_t bytes[sizeof(struct mcu_to_pc_format_t)];
 }; 
 
-void build_mcu_packet
+uint8_t build_mcu_packet
   (union mcu_to_pc * const p, enum mcu_id id, ...);
 
 unsigned int send_mcu_packet

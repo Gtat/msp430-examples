@@ -34,6 +34,7 @@ extern struct parameter_t
   union  dac_word voltages[NUM_DAC_CHS];
   struct rateinfo rate;
   struct processor process;
+  struct processor alarm;
 } parameters;
 
 void update_rates
