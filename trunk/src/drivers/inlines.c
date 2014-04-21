@@ -19,6 +19,18 @@ static inline void setup
 }
 
 /**
+ * Set up both timers to use the real-time clock.
+ * Both are in UP mode. 
+ */
+static inline void timer_setup
+  (void)
+{
+  BCSCTL3  = XCAP_3;  /* oscillator capacitance == 12.5 pF */
+  TA1CTL   = TA0CTL = TASSEL_1 | 
+                      MC_1;
+  TA1CCTL1 = OUTMOD_1;
+}
+/**
  * Initial ADC configuration. 
  *
  * @param channels  The number of channels to sample.
@@ -39,21 +51,17 @@ static inline void adc_setup
               ADC10ON |                /* ADC on */
               ADC10IE;                 /* interrupt active */
 
+  timer_setup();
   /* use timer A1_0 for this to avoid an extra ISR */
-  TA0CCR0   = 30;                       /* Delay to allow Ref to settle */
-  TA0CTL    = TASSEL_2 | MC_1;          /* TACLK = SMCLK, Up mode. */
-  TA0CCTL0 |= CCIE;                     /* Compare-mode interrupt. */
+  TA1CCR0   = 30;                       /* Delay to allow Ref to settle */
+  TA1CCTL0 |=  CCIE;
   __bis_SR_register(LPM0_bits | GIE);  /* low power with interrupts enabled */
-  TA0CCTL0 &= ~CCIE;                    /* disable timer Interrupt */
+  TA1CCTL0 &= ~CCIE;                    /* disable timer Interrupt */
   __disable_interrupt();
 
-
   /* SET TIMER PWM FOR ADC10 TRIGGER! */
-  BCSCTL3  = XCAP_3;                   /* oscillator capacitance == 12.5 pF */
   TA0CCTL1 = OUTMOD_3;                  /* When counter == TACCR1, set output. */
                                        /* When counter == TACCR0, clear output. */
-  TA0CTL = TASSEL_1 |                   /* source from 32.768 kHz ACLK */
-           MC_1;                        /* count up */ 
   update_rates(0, 0x8000 / channels);  /* 32768 / 32.768 kHz = 1.0 s */
 
   while (ADC10CTL1 & BUSY);
@@ -61,12 +69,3 @@ static inline void adc_setup
   ADC10DTC1  = NUM_TOTAL_CHS; 
 }
 
-static inline void timer_setup
-  (void)
-{
-  TA1CCR0   = 0x8000; 
-  TA1CCTL1  = OUTMOD_1;
-  TA1CTL    = TASSEL_1 | 
-             MC_1;
-  TA1CCTL0 |= CCIE;
-}
