@@ -34,11 +34,13 @@ static struct control_t
     STATE_STREAM,
   } state;
 
+  uint16_t seconds;
   volatile uint8_t pc_packets;
   const    uint16_t channels;
 } control = 
   { 
     .state      = STATE_IDLE,
+    .seconds    = 0,
     .pc_packets = 0,
     .channels   = NUM_SIGNAL_CHS,
   };
@@ -62,7 +64,7 @@ int main
 
   adc_setup(NUM_SIGNAL_CHS);
 
-//  set_all_voltages();
+  //set_all_dac_voltages();
   usci_set_mode(USCI_MODE_RS232);
 
   while(1)
@@ -97,7 +99,7 @@ int main
       {
         case PC_PACKET_BEGIN:
         {
-//          set_all_voltages();
+          set_all_dac_voltages();
           control.state = STATE_STREAM;
           break;
         }

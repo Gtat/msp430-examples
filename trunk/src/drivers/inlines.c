@@ -24,6 +24,10 @@ static inline void setup
  */
 static inline void timer_setup
   (void)
+  __attribute__((always_inline));
+
+static inline void timer_setup
+  (void)
 {
   BCSCTL3  = XCAP_3;  /* oscillator capacitance == 12.5 pF */
   TA1CTL   = TA0CTL = TASSEL_1 | 
