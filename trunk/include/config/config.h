@@ -3,8 +3,7 @@
 #define bswap16(x) \
   (((x) << 8)|((x) >> 8))
 
-#define DAC_VOLTAGE(ch, volts)                 \
-  [(ch)] =                                     \
+#define FORMAT_DAC_VOLTAGE(ch, volts)          \
   {                                            \
     .formatted =                               \
     {                                          \
@@ -15,6 +14,9 @@
                          : ((volts) * 128.0)), \
     },                                         \
   }
+
+#define SET_DAC_VOLTAGE_ARRAY(ch, volts)       \
+  [(ch)] = FORMAT_DAC_VOLTAGE(ch, volts)
 
 struct parameter_t parameters =
   {
@@ -27,5 +29,12 @@ struct parameter_t parameters =
     .voltages =
     {
       #include "config/dac_voltages.h"
+    },
+    .amperometry =
+    {
+      .hi_volts = FORMAT_DAC_VOLTAGE(0, 1.5),
+      .lo_volts = FORMAT_DAC_VOLTAGE(0, 0.5),
+      .hi_seconds = 5,
+      .lo_seconds = 7,
     },
   };

@@ -35,7 +35,7 @@ inline void update_rates
  *
  *  @param setting channel, range, and voltage information to be written.
  */
-void set_voltage
+void set_dac_voltage
   (union dac_word setting)
 {
   usci_write(setting.bytes[0]);
@@ -47,15 +47,19 @@ void set_voltage
   P2OUT &= ~0x01;
 }
 
-void set_all_voltages
+void set_all_dac_voltages
   (void)
 {
   unsigned int ch;
+  TA1CCTL0 &= ~CCIE;
   usci_set_mode(USCI_MODE_SPI);
   for (ch = 0; ch < NUM_DAC_CHS; ++ch)
   {
-    set_voltage(parameters.voltages[ch]);
+    set_dac_voltage(parameters.voltages[ch]);
   }
   usci_set_mode(USCI_MODE_RS232);
+
+  TA1CCR0   = 0x8000;
+  TA1CCTL0 |= CCIE;
 }
 

@@ -24,7 +24,7 @@ union __attribute__((packed)) dac_word
   uint8_t bytes[sizeof(struct dac_format_t)];
 };
 
-struct rateinfo
+struct rate_info
 {
   uint16_t taccr;
 };
@@ -34,29 +34,31 @@ enum rate_flags
   RATE_FLAGS_STIMULUS,
 };
 
-extern struct parameter_t
-{
-  union  dac_word voltages[NUM_DAC_CHS];
-  struct rateinfo rate;
-  struct processor process;
-  struct processor alarm;
-} parameters;
-
-struct amperometry_config
+struct amperometry_info
 {
   union dac_word hi_volts;
   union dac_word lo_volts;
-  uint8_t hi_seconds;
-  uint8_t lo_seconds;
+  uint16_t hi_seconds;
+  uint16_t lo_seconds;
 };
+
+extern struct parameter_t
+{
+  union  dac_word         voltages[NUM_DAC_CHS];
+  struct rate_info        rate;
+  struct amperometry_info amperometry;
+  struct processor        process;
+  struct processor        alarm;
+} parameters;
+
 
 void update_rates
   (enum rate_flags flags, uint16_t taccr);
 
-void set_voltage
+void set_dac_voltage
   (union dac_word setting);
 
-void set_all_voltages
+void set_all_dac_voltages
   (void);
 
 #endif  /* __DRIVERS_PARAMETER_H_GUARD */
