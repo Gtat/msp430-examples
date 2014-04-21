@@ -13,9 +13,20 @@
  *               rate at which ADC conversions are triggered.
  */
 inline void update_rates
-  (char flags, uint16_t taccr)
+  (enum rate_flags flags, uint16_t taccr)
 {
-  TACCR0 = TACCR1 = parameters.rate.taccr = taccr;
+  switch (flags)
+  {
+    case RATE_FLAGS_ADC:
+    {
+      TACCR0 = TACCR1 = parameters.rate.taccr = taccr;
+      break;
+    }
+    default:
+    {
+      break;
+    }
+  }
 }
 
 /**

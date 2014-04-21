@@ -39,21 +39,21 @@ static inline void adc_setup
               ADC10ON |                /* ADC on */
               ADC10IE;                 /* interrupt active */
 
-  /* DELAY WHILE REF VOLTAGE SETTLES */
-  TACCR0   = 30;                       /* Delay to allow Ref to settle */
-  TACTL    = TASSEL_2 | MC_1;          /* TACLK = SMCLK, Up mode. */
-  TACCTL0 |= CCIE;                     /* Compare-mode interrupt. */
+  /* use timer A1_0 for this to avoid an extra ISR */
+  TA0CCR0   = 30;                       /* Delay to allow Ref to settle */
+  TA0CTL    = TASSEL_2 | MC_1;          /* TACLK = SMCLK, Up mode. */
+  TA0CCTL0 |= CCIE;                     /* Compare-mode interrupt. */
   __bis_SR_register(LPM0_bits | GIE);  /* low power with interrupts enabled */
-  TACCTL0 &= ~CCIE;                    /* disable timer Interrupt */
+  TA0CCTL0 &= ~CCIE;                    /* disable timer Interrupt */
   __disable_interrupt();
 
 
   /* SET TIMER PWM FOR ADC10 TRIGGER! */
   BCSCTL3  = XCAP_3;                   /* oscillator capacitance == 12.5 pF */
-  TACCTL1 = OUTMOD_3;                  /* When counter == TACCR1, set output. */
+  TA0CCTL1 = OUTMOD_3;                  /* When counter == TACCR1, set output. */
                                        /* When counter == TACCR0, clear output. */
-  TACTL = TASSEL_1 |                   /* source from 32.768 kHz ACLK */
-          MC_1;                        /* count up */ 
+  TA0CTL = TASSEL_1 |                   /* source from 32.768 kHz ACLK */
+           MC_1;                        /* count up */ 
   update_rates(0, 0x8000 / channels);  /* 32768 / 32.768 kHz = 1.0 s */
 
   while (ADC10CTL1 & BUSY);
@@ -61,3 +61,12 @@ static inline void adc_setup
   ADC10DTC1  = NUM_TOTAL_CHS; 
 }
 
+static inline void timer_setup
+  (void)
+{
+  TA1CCR0   = 0x8000; 
+  TA1CCTL1  = OUTMOD_1;
+  TA1CTL    = TASSEL_1 | 
+             MC_1;
+  TA1CCTL0 |= CCIE;
+}

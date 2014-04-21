@@ -21,12 +21,17 @@ union __attribute__((packed)) dac_word
     char            : 5;
     uint8_t data;
   } formatted;
-  uint8_t bytes[sizeof(uint16_t)];
+  uint8_t bytes[sizeof(struct dac_format_t)];
 };
 
 struct rateinfo
 {
   uint16_t taccr;
+};
+enum rate_flags
+{
+  RATE_FLAGS_ADC,
+  RATE_FLAGS_STIMULUS,
 };
 
 extern struct parameter_t
@@ -37,8 +42,16 @@ extern struct parameter_t
   struct processor alarm;
 } parameters;
 
+struct amperometry_config
+{
+  union dac_word hi_volts;
+  union dac_word lo_volts;
+  uint8_t hi_seconds;
+  uint8_t lo_seconds;
+};
+
 void update_rates
-  (char flags, uint16_t taccr);
+  (enum rate_flags flags, uint16_t taccr);
 
 void set_voltage
   (union dac_word setting);

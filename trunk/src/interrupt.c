@@ -78,7 +78,6 @@ __interrupt void adc_isr
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void timer_isr(void)
 {
-  TACTL = 0;
+  TA0CTL = 0;
   LPM0_EXIT;
 }
-
