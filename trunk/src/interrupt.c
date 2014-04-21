@@ -70,14 +70,9 @@ __interrupt void adc_isr
   __bic_SR_register_on_exit(LPM0_bits);
 }
 
-/**
- * This timer is configured as the conversion trigger for the ADC, but
- * it will only have an interrupt during setup to inform us that the
- * reference settling time is complete.
- */
-#pragma vector=TIMER0_A0_VECTOR
-__interrupt void timer_isr(void)
+#pragma vector=TIMER1_A0_VECTOR
+__interrupt void timer1_a0_isr
+  (void)
 {
-  TA0CTL = 0;
-  LPM0_EXIT;
+  __bic_SR_register_on_exit(LPM0_bits);
 }
