@@ -92,6 +92,5 @@ __interrupt void timer1_a0_isr
   {
     ++control.seconds;
   }
-
   __bic_SR_register_on_exit(LPM0_bits);
 }

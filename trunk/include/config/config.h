@@ -35,6 +35,6 @@ struct parameter_t parameters =
       .hi_volts = FORMAT_DAC_VOLTAGE(0, 1.5),
       .lo_volts = FORMAT_DAC_VOLTAGE(0, 0.5),
       .hi_seconds = 5,
-      .lo_seconds = 7,
+      .lo_seconds = 15,
     },
   };
