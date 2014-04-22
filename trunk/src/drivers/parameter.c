@@ -79,7 +79,6 @@ void amperometry_on
 void amperometry_off
   (void)
 {
-  UC0IE &= ~UCA0RXIE;
   TA1CCTL0 &= ~CCIE;
 }
 #endif /* #ifdef CONFIG_USE_DYNAMIC_BIASING */

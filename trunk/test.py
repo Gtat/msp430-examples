@@ -37,7 +37,7 @@ def parse_packet(ser, buf, crc):
       print '\t\tCRC FAIL: %02x vs %02x' % (ord(packet[-1]), check)
       buf.extendleft(packet[1:])
     else:
-      print '\t\tCRC OK:   %02x', % check
+      print '\t\tCRC OK:   %02x' % check,
       print ' ID: %02x' % ord(packet[0])
 
 def main(serial_path):
