@@ -28,7 +28,9 @@ union __PACK pc_to_mcu
     /* header byte -- little-endian so leftmost bit "dest" is LSB */
     struct __PACK
     {
-      unsigned int flags : 4; 
+      enum pc_flags
+      {
+      }  flags : 4; 
       /* 3-bit IDs */
       enum pc_id
       { 
