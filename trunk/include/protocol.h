@@ -62,14 +62,22 @@ union mcu_to_pc
 {
   struct mcu_to_pc_format_t
   {
-    /* 1 byte */
+    /* 4 bits */
     enum mcu_id
     {
-      DATA  = 0x00,
-      RETRY = 0x01,
-      OK    = 0x02,
-      ALERT = 0xFF,
-    } id;
+      DATA  = 0x0,
+      RETRY = 0x1,
+      OK    = 0x2,
+      ALERT = 0xF,
+    } id : 4;
+
+    /* identifying information about the payload
+     * e.g. whether the methane readings are valid 
+     */
+    enum mcu_flags
+    {
+      AMPEROMETRY_CH_VALID = 0x1,
+    } flags : 4;
 
     /* 6 bytes */
     union __PACK

@@ -1,4 +1,5 @@
 #include "processing.h"
+#include "config/options.h"
 
 #define bswap16(x) \
   (((x) << 8)|((x) >> 8))
@@ -30,11 +31,13 @@ struct parameter_t parameters =
     {
       #include "config/dac_voltages.h"
     },
+#ifdef CONFIG_USE_DYNAMIC_BIASING
     .amperometry =
     {
       .hi_volts = FORMAT_DAC_VOLTAGE(0, 1.5),
       .lo_volts = FORMAT_DAC_VOLTAGE(0, 0.5),
-      .hi_seconds = 5,
-      .lo_seconds = 15,
+      .hi_seconds = 6,
+      .lo_seconds = 10,
     },
+#endif /* #ifdef CONFIG_USE_DYNAMIC_BIASING */
   };
