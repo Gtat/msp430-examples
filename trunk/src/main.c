@@ -80,8 +80,15 @@ int main
       {
         while (!RING_QUEUE_EMPTY(sample_q))
         {
-          build_status = build_mcu_packet(&mcu_packet, DATA);
+          build_status = build_mcu_packet(&mcu_packet, DATA, control.seconds);
           send_mcu_packet(&mcu_packet);
+#ifdef CONFIG_ALERTS_ACTIVE
+          if (build_status)
+          {
+            build_mcu_packet(&mcu_packet, ALERT, build_status);
+            send_mcu_packet(&mcu_packet);
+          }
+#endif /* #ifdef CONFIG_ALERTS_ACTIVE */
         }
         break;
       }
@@ -105,6 +112,9 @@ int main
         }
         case PC_PACKET_HALT:
         {
+#ifdef CONFIG_USE_DYNAMIC_BIASING
+          amperometry_off();
+#endif /* #ifdef CONFIG_USE_DYNAMIC_BIASING */
           control.state = STATE_IDLE;
           break;
         }

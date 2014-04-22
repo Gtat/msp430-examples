@@ -16,6 +16,7 @@
 #define MACRO_COMMA    ,
 
 #include <msp430.h>
+#include "config/options.h"
 #include "ringq.h"
 
 /** \union word
