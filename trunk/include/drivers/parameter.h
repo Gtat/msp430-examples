@@ -34,7 +34,7 @@ enum rate_flags
   RATE_FLAGS_STIMULUS,
 };
 
-#ifdef CONFIG_USE_DYNAMIC_BIASING
+#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
 struct amperometry_info
 {
   union dac_word hi_volts;
@@ -43,15 +43,15 @@ struct amperometry_info
   uint16_t lo_seconds;
   uint16_t start_recording;
 };
-#endif /* #ifdef CONFIG_USE_DYNAMIC_BIASING */
+#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
 
 extern struct parameter_t
 {
   union  dac_word         voltages[NUM_DAC_CHS];
   struct rate_info        rate;
-#ifdef CONFIG_USE_DYNAMIC_BIASING
+#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
   struct amperometry_info amperometry;
-#endif /* #ifdef CONFIG_USE_DYNAMIC_BIASING */
+#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
   struct processor        process;
   struct processor        alarm;
 } parameters;

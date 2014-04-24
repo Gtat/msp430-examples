@@ -3,6 +3,8 @@ OUTPUT_FORMAT("elf32-msp430")
 OUTPUT_ARCH("msp430")
 INCLUDE link/memory.x
 INCLUDE link/periph.x
+
+__flash_block_size = 0x200;
 SECTIONS
 {
   /* Read-only sections, merged into text segment.  */
@@ -75,6 +77,14 @@ SECTIONS
      . = ALIGN(2);
   }  > REGION_TEXT
    _etext = .; /* Past last read-only (loadable) segment */
+  .flash_storage :
+  {
+    . = ALIGN(__flash_block_size);
+    __start_flash_storage = .;
+    flash.o (.flash_storage)
+    . = ALIGN(__flash_block_size);
+    __end_flash_storage = .;
+  } > REGION_TEXT
   .data   :
   {
      . = ALIGN(2);

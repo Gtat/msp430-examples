@@ -16,6 +16,10 @@ static inline void setup
   } 
   BCSCTL1 = CALBC1_1MHZ;
   DCOCTL  = CALDCO_1MHZ;
+
+#ifdef CONFIG_ENABLE_STORAGE_MODE
+  FCTL2 = FWKEY | FSSEL1 | FN0; /* flash is clocked with SMCLK/2 */
+#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 }
 
 /**
