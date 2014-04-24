@@ -15,6 +15,15 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define RING_QUEUE_DECLARE_NAMED_TYPE(type, elem_ct, name) \
+  struct name                                              \
+  {                                                        \
+    type              data[elem_ct];                       \
+    uint16_t          head,   tail;                        \
+    volatile uint16_t length;                              \
+    const uint16_t    depth;                               \
+  } 
+
 /** \def RING_QUEUE_DECLARE(type, elem_ct)
  *  Generate the declaration for a FIFO structure.
  *
@@ -22,13 +31,7 @@
  *  @param elem_ct The maximum number of elements in the FIFO.
  */
 #define RING_QUEUE_DECLARE(type, elem_ct) \
-  struct                                  \
-  {                                       \
-    type             data[elem_ct];       \
-    uint16_t          head,   tail;       \
-    volatile uint16_t length;                      \
-    const uint16_t    depth;              \
-  } 
+  RING_QUEUE_DECLARE_NAMED_TYPE(type, elem_ct, )
 
 /** \def RING_QUEUE_DECLARE_GLOBAL(type, elem_ct, name)
  *  Generate the declaration for a FIFO structure and make an extern 
