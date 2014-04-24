@@ -52,9 +52,9 @@ void set_all_dac_voltages
 {
   unsigned int ch;
 
-#ifdef CONFIG_USE_DYNAMIC_BIASING
+#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
   amperometry_off();
-#endif /* #ifdef CONFIG_USE_DYNAMIC_BIASING */
+#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
 
   usci_set_mode(USCI_MODE_SPI);
   for (ch = 0; ch < NUM_DAC_CHS; ++ch)
@@ -63,12 +63,12 @@ void set_all_dac_voltages
   }
   usci_set_mode(USCI_MODE_RS232);
 
-#ifdef CONFIG_USE_DYNAMIC_BIASING
+#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
   amperometry_on();
-#endif /* #ifdef CONFIG_USE_DYNAMIC_BIASING */
+#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
 }
 
-#ifdef CONFIG_USE_DYNAMIC_BIASING 
+#ifdef CONFIG_ENABLE_DYNAMIC_BIASING 
 void amperometry_on
   (void)
 {
@@ -81,5 +81,5 @@ void amperometry_off
 {
   TA1CCTL0 &= ~CCIE;
 }
-#endif /* #ifdef CONFIG_USE_DYNAMIC_BIASING */
+#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
 

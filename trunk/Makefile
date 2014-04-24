@@ -15,9 +15,9 @@ ASMDIR   = asm
 INCLUDES = -Iinclude 
 LDSCRIPT = -Tlink/msp430.x
 ###############################################################################
-CFLAGS   = -mmcu=$(MCU) -g -Wall $(INCLUDES) -fshort-enums -Os 
-ASFLAGS  = -mmcu=$(MCU) -x assembler-with-cpp -Wa,-gstabs 
-LDFLAGS  = $(LDSCRIPT) -Wl,-Map=$(TARGET).map 
+CFLAGS   = -mmcu=$(MCU) $(LDSCRIPT) -g -Wall $(INCLUDES) -fshort-enums -Os 
+ASFLAGS  = -mmcu=$(MCU) $(LDSCRIPT) -x assembler-with-cpp -Wa,-gstabs 
+LDFLAGS  = -mmcu=$(MCU) $(LDSCRIPT) -Wl,-Map=$(TARGET).map 
 ###############################################################################
 CC       = msp430-gcc
 LD       = msp430-ld

@@ -1,7 +1,7 @@
-EXPAND_PROCESSOR(nothing, {})
+EXPAND_PROCESSOR(nothing, {}) 
 
 EXPAND_PROCESSOR(truncate_sample, {})
-#define truncate_sample_initializer {0}
+#define truncate_sample_initializer {}
 
 //#define include_moving_average
 #ifdef include_moving_average

@@ -39,7 +39,7 @@ uint8_t build_mcu_packet
     case DATA:
     {
       unsigned int ch;
-#ifdef CONFIG_USE_DYNAMIC_BIASING
+#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
       uint16_t t;
 
       t = va_arg(ap, uint16_t);
@@ -49,9 +49,9 @@ uint8_t build_mcu_packet
       {
         p->command.flags = AMPEROMETRY_CH_VALID;
       }
-#else  /* #ifdef CONFIG_USE_DYNAMIC_BIASING */
+#else  /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
       p->command.flags = 0;
-#endif /* #ifdef CONFIG_USE_DYNAMIC_BIASING */
+#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
 
       for (ch = index = 0; 
            (index < NUM_TOTAL_CHS) && (ch < NUM_SIGNAL_CHS); 

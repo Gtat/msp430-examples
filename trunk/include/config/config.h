@@ -31,7 +31,7 @@ struct parameter_t parameters =
     {
       #include "config/dac_voltages.h"
     },
-#ifdef CONFIG_USE_DYNAMIC_BIASING
+#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
     .amperometry =
     {
       .hi_volts = FORMAT_DAC_VOLTAGE(0, 1.5),
@@ -39,5 +39,5 @@ struct parameter_t parameters =
       .hi_seconds = 6,
       .lo_seconds = 10,
     },
-#endif /* #ifdef CONFIG_USE_DYNAMIC_BIASING */
+#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
   };

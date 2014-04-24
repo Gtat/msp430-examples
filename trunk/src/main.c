@@ -19,6 +19,7 @@
 #include "ringq.h"
 #include "protocol.h"
 
+#include "drivers/flash.h"
 #include "drivers/parameter.h"
 #include "drivers/usci.h"
 #include "processing.h"
@@ -54,6 +55,9 @@ RING_QUEUE_CREATE_PREDEFINED(sample_buffer,  4, sample_q);
 union mcu_to_pc mcu_packet;
 union pc_to_mcu  pc_packet;
 
+struct flash_record data_record;
+static uint8_t test_data[] = "\xDE\xAD\xBE\xEF\x01\x02\x03\x04\x05\x06";
+
 int main
   (void)
 {
@@ -61,6 +65,10 @@ int main
   uint8_t build_status;
 
   setup();                                     /* system setup */
+
+  flash_record_init(&data_record, FLASH_ADDR_LO, 0x80);
+  flash_record_append(&data_record, test_data, sizeof(test_data));
+  while(1);
 
   adc_setup(NUM_SIGNAL_CHS);
 
@@ -112,9 +120,9 @@ int main
         }
         case PC_PACKET_HALT:
         {
-#ifdef CONFIG_USE_DYNAMIC_BIASING
+#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
           amperometry_off();
-#endif /* #ifdef CONFIG_USE_DYNAMIC_BIASING */
+#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
           control.state = STATE_IDLE;
           break;
         }
