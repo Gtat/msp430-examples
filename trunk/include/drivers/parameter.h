@@ -5,17 +5,12 @@
 #include "global.h"
 #include "processing.h"
 
-#ifdef CONFIG_ENABLE_STORAGE_MODE
-#include "drivers/flash.h"
-#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
-
 #define NUM_DAC_CHS 4
 
 /** \union dac_word
  *  Configuration format for the TI TLV5620 Quadruple DAC.
  */
 union __attribute__((packed)) dac_word
-  
 {
   struct __attribute__((packed)) dac_format_t
   {
