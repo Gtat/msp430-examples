@@ -31,5 +31,10 @@ void usci_write
 inline void usci_commit
   (void);
 
+inline void usci_block_tx
+  (void);
+inline void usci_block_rx
+  (void);
+
 #endif /* __DRIVERS_USCI_H_GUARD */
 

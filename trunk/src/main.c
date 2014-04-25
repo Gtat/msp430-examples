@@ -33,6 +33,7 @@ static struct control_t
     STATE_IDLE,
     STATE_SETUP,
     STATE_STREAM,
+    STATE_FLUSH,
   } state;
 
   uint16_t seconds;
@@ -55,8 +56,10 @@ RING_QUEUE_CREATE_PREDEFINED(sample_buffer,  4, sample_q);
 union mcu_to_pc mcu_packet;
 union pc_to_mcu  pc_packet;
 
-struct flash_record data_record;
-static uint8_t test_data[] = "\xDE\xAD\xBE\xEF\x01\x02\x03\x04\x05\x06";
+#ifdef CONFIG_ENABLE_STORAGE_MODE
+struct flash_record config_record = { 0 };
+struct flash_record data_record   = { 0 };
+#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 
 int main
   (void)
@@ -65,20 +68,15 @@ int main
   uint8_t build_status;
 
   setup();                                     /* system setup */
-
-  flash_record_init(&data_record, FLASH_ADDR_LO, 0x80);
-  flash_record_append(&data_record, test_data, sizeof(test_data));
-  while(1);
-
   adc_setup(NUM_SIGNAL_CHS);
-
-  //set_all_dac_voltages();
   usci_set_mode(USCI_MODE_RS232);
+#ifdef CONFIG_ENABLE_STORAGE_MODE
+  flash_record_init(&data_record,   (uint8_t *)&stored_data,       0x80);
+  flash_record_init(&config_record, (uint8_t *)&stored_parameters, 0x80);
+#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 
   while(1)
   {
-    __bis_SR_register(LPM0_bits | GIE);       /* enter low power mode 0 */
-                                              /* with interrupts on */
     /* TX state machine
      * The state cannot change in response to a TXed packet. 
      */
@@ -86,11 +84,13 @@ int main
     {
       case STATE_STREAM:
       {
+        __bis_SR_register(LPM0_bits | GIE); /* enter low power mode 0 */
+                                            /* with interrupts on */
         while (!RING_QUEUE_EMPTY(sample_q))
         {
           build_status = build_mcu_packet(&mcu_packet, DATA, control.seconds);
           send_mcu_packet(&mcu_packet);
-#ifdef CONFIG_ALERTS_ACTIVE
+#ifdef CONFIG_ENABLE_ALERTS
           if (build_status)
           {
             build_mcu_packet(&mcu_packet, ALERT, build_status);
@@ -100,8 +100,31 @@ int main
         }
         break;
       }
+#ifdef CONFIG_ENABLE_STORAGE_MODE
+      case STATE_FLUSH:
+      {
+        build_mcu_packet(&mcu_packet, PREAMBLE, &config_record);
+        send_mcu_packet(&mcu_packet);
+        usci_block_tx();
+
+        while (build_mcu_packet(&mcu_packet, STORED, &data_record) >= NUM_SIGNAL_CHS)
+        {
+          send_mcu_packet(&mcu_packet);
+          usci_block_tx();
+        }
+
+        build_mcu_packet(&mcu_packet, OK);
+        send_mcu_packet(&mcu_packet);
+        usci_block_tx();
+
+        control.state = STATE_IDLE;
+        break;
+      }
+#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
       default:
       {
+        __bis_SR_register(LPM0_bits | GIE); /* enter low power mode 0 */
+                                            /* with interrupts on */
         break;
       }
     }
@@ -112,6 +135,13 @@ int main
       packet_status = process_pc_packet(&pc_packet);
       switch (packet_status)
       {
+#ifdef CONFIG_ENABLE_STORAGE_MODE
+        case PC_PACKET_DUMP:
+        {
+          control.state = STATE_FLUSH;
+          break;
+        }
+#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
         case PC_PACKET_BEGIN:
         {
           set_all_dac_voltages();

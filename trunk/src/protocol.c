@@ -12,8 +12,13 @@
 #include "protocol.h"
 #include "processing.h"
 #include "drivers/adc.h"
+#include "drivers/flash.h"
 #include "drivers/parameter.h"
 #include "drivers/usci.h"
+
+#ifdef CONFIG_ENABLE_STORAGE_MODE
+const struct storage_cell stored_data[CONFIG_MAX_STORED_SAMPLES];
+#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 
 /**
  * Construct a packet to send to the PC of the given type in-place at the
@@ -49,8 +54,6 @@ uint8_t build_mcu_packet
       {
         p->command.flags = AMPEROMETRY_CH_VALID;
       }
-#else  /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
-      p->command.flags = 0;
 #endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
 
       for (ch = index = 0; 
@@ -81,6 +84,35 @@ uint8_t build_mcu_packet
 
       break;
     }
+#ifdef CONFIG_ENABLE_STORAGE_MODE
+    case PREAMBLE:
+    {
+      struct parameter_t * c;
+     
+      c = (struct parameter_t *)va_arg(ap, struct flash_record *);
+      p->command.payload.preamble.flags = c->flags;
+      p->command.payload.preamble.rates = c->rates;
+      break;
+    }
+    case STORED:
+    {
+      struct flash_record *r;
+  
+      r = va_arg(ap, struct flash_record *); 
+      flash_record_destructive_read(r, 
+                                    &p->command.payload.samples,
+                                    NUM_SIGNAL_CHS);
+      ret = r->length - r->available;
+    }
+#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
+    case OK:
+    {
+      break;
+    }
+    case ALERT:
+    {
+      break;
+    }
     case RETRY:
     {
       char * ptr = va_arg(ap, char *);
@@ -93,14 +125,6 @@ uint8_t build_mcu_packet
       {
         p->command.payload.samples[index] = 0;
       }
-      break;
-    }
-    case OK:
-    {
-      break;
-    }
-    case ALERT:
-    {
       break;
     }
     default:
@@ -157,7 +181,7 @@ enum pc_packet_status process_pc_packet
   {
     case DUMP:
     {
-      break;
+      return PC_PACKET_DUMP;
     }
     case CAPTURE:
     {

@@ -4,7 +4,7 @@ OUTPUT_ARCH("msp430")
 INCLUDE link/memory.x
 INCLUDE link/periph.x
 
-__flash_block_size = 0x200;
+__flash_segment_size = 0x200;
 SECTIONS
 {
   /* Read-only sections, merged into text segment.  */
@@ -79,10 +79,14 @@ SECTIONS
    _etext = .; /* Past last read-only (loadable) segment */
   .flash_storage :
   {
-    . = ALIGN(__flash_block_size);
+    . = ALIGN(__flash_segment_size);
     __start_flash_storage = .;
-    flash.o (.flash_storage)
-    . = ALIGN(__flash_block_size);
+
+    parameter.o (.flash_storage)
+    . = ALIGN(__flash_segment_size);
+    protocol.o  (.flash_storage)
+    . = ALIGN(__flash_segment_size);
+
     __end_flash_storage = .;
   } > REGION_TEXT
   .data   :
@@ -113,6 +117,11 @@ SECTIONS
   }  > REGION_DATA
    . = ALIGN(2);
    _end = . ;   /* Past last write (loadable) segment */
+  .ram_routines :
+  {
+    . = ALIGN(2);
+    *(.ram_routines)
+  } > REGION_DATA
   .infomem   :
   {
     *(.infomem)

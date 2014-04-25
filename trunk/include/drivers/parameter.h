@@ -5,6 +5,9 @@
 #include "global.h"
 #include "processing.h"
 
+#ifdef CONFIG_ENABLE_STORAGE_MODE
+#include "drivers/flash.h"
+#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 
 #define NUM_DAC_CHS 4
 
@@ -26,7 +29,10 @@ union __attribute__((packed)) dac_word
 
 struct rate_info
 {
-  uint16_t taccr;
+  uint16_t scan_rate;
+#ifdef CONFIG_ENABLE_STORAGE_MODE
+  uint16_t storage_rate;
+#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 };
 enum rate_flags
 {
@@ -48,14 +54,14 @@ struct amperometry_info
 extern struct parameter_t
 {
   union  dac_word         voltages[NUM_DAC_CHS];
-  struct rate_info        rate;
+  uint8_t                 flags;
+  struct rate_info        rates;
 #ifdef CONFIG_ENABLE_DYNAMIC_BIASING
   struct amperometry_info amperometry;
 #endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
   struct processor        process;
   struct processor        alarm;
 } parameters;
-
 
 void update_rates
   (enum rate_flags flags, uint16_t taccr);
@@ -70,6 +76,11 @@ inline void amperometry_on
   (void);
 void amperometry_off
   (void);
+
+#ifdef CONFIG_ENABLE_STORAGE_MODE
+extern const struct parameter_t stored_parameters
+  __attribute__ (( section(".flash_storage") ));
+#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 
 #endif  /* __DRIVERS_PARAMETER_H_GUARD */
 

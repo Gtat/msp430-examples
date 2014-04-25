@@ -39,10 +39,10 @@ union __PACK pc_to_mcu
         SET_RATES   = 0x5,
         SET_MARGIN  = 0x6,
       } id : 4; 
-/*      enum pc_flags
+      enum pc_flags
       {
         NONE
-      } flags : 4; */
+      } flags : 4; 
     };
 
     union __PACK
@@ -57,7 +57,6 @@ union __PACK pc_to_mcu
   uint8_t bytes[sizeof(struct pc_to_mcu_format_t)];
 } __attribute__((packed));
 
-
 /** \union mcu_command
  *  The format for messages from the microcontroller.
  */
@@ -65,27 +64,35 @@ union mcu_to_pc
 {
   struct mcu_to_pc_format_t
   {
-    /* 4 bits */
     enum mcu_id
     {
-      DATA  = 0x0,
-      RETRY = 0x1,
-      OK    = 0x2,
-      ALERT = 0xF,
+      DATA     = 0x0,
+      RETRY    = 0x1,
+      OK       = 0x2,
+      PREAMBLE = 0x3,
+      STORED   = 0x4,
+      ALERT    = 0xF,
     } id : 4;
 
     /* identifying information about the payload
      * e.g. whether the methane readings are valid 
      */
-    enum mcu_flags
+/*    enum mcu_flags
     {
       AMPEROMETRY_CH_VALID = 0x1,
     } flags : 4;
-
+*/
     /* 6 bytes */
     union __PACK
     {
-      uint8_t samples[NUM_SIGNAL_CHS];
+      uint8_t samples[NUM_SIGNAL_CHS]; /* for DATA packets */
+ 
+      struct __PACK
+      {
+        uint8_t          flags;
+        struct rate_info rates;
+        uint8_t others[];
+      } preamble;
 
       struct __PACK
       {
@@ -108,7 +115,7 @@ union mcu_to_pc
         
         uint16_t timestamp;
         uint8_t  data[3];
-      } alert;
+      } alert;                        /* for ALERT packets */
   
       uint8_t empty;
     } payload;
@@ -132,6 +139,7 @@ enum pc_packet_status
   PC_PACKET_EMPTY,
   PC_PACKET_BAD_CRC,
   PC_PACKET_BEGIN,
+  PC_PACKET_DUMP,
   PC_PACKET_HALT,
 };
 
@@ -143,6 +151,17 @@ enum pc_packet_status process_pc_packet
 uint8_t crc8
   (const uint8_t * data, int len, uint8_t crc);
 #endif
+
+#ifdef CONFIG_ENABLE_STORAGE_MODE
+  struct storage_cell
+  {
+    uint8_t flags     : 4;
+    long    timestamp : 12;
+    uint8_t samples[NUM_SIGNAL_CHS]; 
+  };
+  extern const struct storage_cell stored_data[CONFIG_MAX_STORED_SAMPLES]
+    __attribute__(( section(".flash_storage") ));
+#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 
 #endif /* __PROTOCOL_H_GUARD */
 

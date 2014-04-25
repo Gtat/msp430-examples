@@ -23,9 +23,9 @@ struct parameter_t parameters =
   {
     .process  = INIT_PROCESSOR(truncate_sample),
     .alarm    = { 0 },
-    .rate     =
+    .rates    =
     {
-      .taccr = 0xF424,
+      .scan_rate = 0xF424,
     },
     .voltages =
     {
@@ -41,3 +41,4 @@ struct parameter_t parameters =
     },
 #endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
   };
+
