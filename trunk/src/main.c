@@ -89,7 +89,7 @@ int main
   }
 
   if (flash_record_append(&data_record, 
-                          RAM_SYMBOL_PTR(test_vector), 
+                          RAM_CODE_PTR(test_vector), 
                           16) < 16)
   {
     while(1);

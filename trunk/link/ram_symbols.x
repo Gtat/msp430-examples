@@ -5,9 +5,9 @@
   .ram_symbols_in_rom :
   {
     . = ALIGN(2);
-    ram_symbols_rom_begin = .;
+    ram_code_rom_begin = .;
     *(.ram_symbols)
-    ram_symbols_rom_end = .;
+    ram_code_rom_end = .;
   } > rom 
   /* Provide a RAM buffer where this code will be copied */
   .ram_symbols_in_ram :
