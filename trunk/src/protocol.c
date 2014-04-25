@@ -100,7 +100,7 @@ uint8_t build_mcu_packet
   
       r = va_arg(ap, struct flash_record *); 
       flash_record_destructive_read(r, 
-                                    &p->command.payload.samples,
+                                    (uint8_t * const)&p->command.payload.samples,
                                     NUM_SIGNAL_CHS);
       ret = r->length - r->available;
     }

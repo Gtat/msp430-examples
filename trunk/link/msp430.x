@@ -5,6 +5,7 @@ INCLUDE link/memory.x
 INCLUDE link/periph.x
 
 __flash_segment_size = 0x200;
+__stack_size = 0xA0;
 SECTIONS
 {
   /* Read-only sections, merged into text segment.  */
@@ -117,11 +118,9 @@ SECTIONS
   }  > REGION_DATA
    . = ALIGN(2);
    _end = . ;   /* Past last write (loadable) segment */
-  .ram_routines :
-  {
-    . = ALIGN(2);
-    *(.ram_routines)
-  } > REGION_DATA
+
+  INCLUDE link/ram_symbols.x
+
   .infomem   :
   {
     *(.infomem)
@@ -197,7 +196,7 @@ SECTIONS
   /* DWARF 3 */
   .debug_pubtypes 0 : { *(.debug_pubtypes) }
   .debug_ranges   0 : { *(.debug_ranges) }
-   PROVIDE (__stack = ORIGIN(ram) + LENGTH(ram));
+   PROVIDE (__stack = ORIGIN(ram) + LENGTH(ram)); 
    PROVIDE (__data_start_rom = _etext);
    PROVIDE (__data_end_rom   = _etext + SIZEOF (.data));
 }

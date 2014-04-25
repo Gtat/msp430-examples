@@ -17,14 +17,15 @@
 
 #include "global.h"
 #include "ringq.h"
-#include "protocol.h"
 
+#include "protocol.h"
 #include "drivers/flash.h"
 #include "drivers/parameter.h"
 #include "drivers/usci.h"
 #include "processing.h"
 
 #include "drivers/inlines.c"
+#include "ram_symbols.h"
 
 static struct control_t
 {
@@ -61,6 +62,9 @@ struct flash_record config_record = { 0 };
 struct flash_record data_record   = { 0 };
 #endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 
+uint8_t test_vector[] __attribute__ (( section(".ram_symbols") )) =
+  "0123456789abcdef";
+
 int main
   (void)
 {
@@ -71,8 +75,25 @@ int main
   adc_setup(NUM_SIGNAL_CHS);
   usci_set_mode(USCI_MODE_RS232);
 #ifdef CONFIG_ENABLE_STORAGE_MODE
-  flash_record_init(&data_record,   (uint8_t *)&stored_data,       0x80);
-  flash_record_init(&config_record, (uint8_t *)&stored_parameters, 0x80);
+  if (flash_record_init(&data_record,   
+                    (uint8_t *)&stored_data,
+                    sizeof(stored_data)) < 0)
+  {
+    while(1);
+  }
+  if (flash_record_init(&config_record, 
+                        (uint8_t *)&stored_parameters, 
+                        sizeof(stored_parameters)) < 0)
+  {
+    while(1);
+  }
+
+  if (flash_record_append(&data_record, 
+                          RAM_SYMBOL_PTR(test_vector), 
+                          16) < 16)
+  {
+    while(1);
+  }
 #endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 
   while(1)

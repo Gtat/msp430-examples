@@ -1,14 +1,15 @@
 TARGET     = iegas
 MCU        = msp430g2553
 
-SOURCES  = main.c      \
-           utility.c   \
-           adc.c       \
-           flash.c     \
-           usci.c      \
-           protocol.c  \
-           parameter.c \
-           processing.c
+SOURCES  = main.c         \
+           utility.c      \
+           adc.c          \
+           flash.c        \
+           usci.c         \
+           protocol.c     \
+           parameter.c    \
+           processing.c   \
+           ram_symbols.c
 VPATH    = src/drivers:src
 BUILDDIR = build/
 ASMDIR   = asm
