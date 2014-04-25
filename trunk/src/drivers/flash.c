@@ -87,7 +87,7 @@ int flash_record_destructive_read
 
     old_segment = (uint8_t *)ALIGN_DOWN(r->head, FLASH_SEGMENT_SIZE);
     rem = FLASH_SEGMENT_SIZE - BIN_POW_MOD(r->head, FLASH_SEGMENT_SIZE);
-    chunk = max(count, r->available);
+    chunk = max(count, r->length - r->available);
     chunk = min(chunk, rem);
 
     for (i = read; i < chunk; ++i)
@@ -111,6 +111,7 @@ static void flash_erase_block
   FCTL3 = FWKEY;         /* clear flash lock */
   FCTL1 = FWKEY | ERASE; /* erase will occur on next write */
   *p = 0;                /* dummy write */
+  while (FCTL3 & BUSY);
 }
 
 static void flash_write
@@ -119,7 +120,6 @@ static void flash_write
 {
   size_t i;
 
-  while (FCTL3 & BUSY);
   FCTL1 = FWKEY | WRT; 
 
   for (i = 0; i < count; ++i)
