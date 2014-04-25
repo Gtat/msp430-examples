@@ -74,6 +74,7 @@ __interrupt void adc_isr
 __interrupt void timer1_a0_isr
   (void)
 {
+#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
   if (control.seconds == parameters.amperometry.hi_seconds)
   {
     usci_set_mode(USCI_MODE_SPI);
@@ -92,5 +93,6 @@ __interrupt void timer1_a0_isr
   {
     ++control.seconds;
   }
+#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
   __bic_SR_register_on_exit(LPM0_bits);
 }

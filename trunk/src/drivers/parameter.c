@@ -2,6 +2,9 @@
 #include "drivers/usci.h"
 #include "config/config.h"
 
+#ifdef CONFIG_ENABLE_STORAGE_MODE
+const struct parameter_t stored_parameters;
+#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 
 /**
  * Set new timer values in order to change the ADC sampling rate and the
@@ -19,7 +22,7 @@ inline void update_rates
   {
     case RATE_FLAGS_ADC:
     {
-      TACCR0 = TACCR1 = parameters.rate.taccr = taccr;
+      TACCR0 = TACCR1 = parameters.rates.scan_rate = taccr;
       break;
     }
     default:

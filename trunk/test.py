@@ -23,14 +23,12 @@ def parse_packet(ser, buf, crc):
     packet = []
     for i in xrange(BYTES_PER_INCOMING_PACKET):
       x = buf.pop()
-#      print '%02x ' % ord(x),
+      print '%02x ' % ord(x),
       packet.append(x)          
 
     # human-readable voltages
-    for x in packet[1:-2]:
-      print '%0.03f' % ((ord(x) / 255.0) * 3.5),
-
-    
+#    for x in packet[1:-2]:
+#      print '%0.03f' % ((ord(x) / 255.0) * 3.5),
 
     check = crc(''.join(packet[:-1]))
     if ord(packet[-1]) != check:
@@ -59,11 +57,14 @@ def main(serial_path):
   try:
     # SET_RATES to 2 Hz
 #    raw_input()
-#    send_packet(ser, crc, 0x50, 0x99, 0x19)
+#    send_packet(ser, crc, 0x05, 0x99, 0x19)
 
     # CAPTURE message
+#    raw_input()
+#    send_packet(ser, crc, 0x02, 0, 0)
+    # DUMP message
     raw_input()
-    send_packet(ser, crc, 0x20, 0, 0)
+    send_packet(ser, crc, 0x01, 0, 0)
 
     while True:
       parse_packet(ser, buf, crc)
@@ -71,7 +72,7 @@ def main(serial_path):
   except KeyboardInterrupt:
     print '^C'
     # HALT message
-    send_packet(ser, crc, 0x30, 0, 0)
+    send_packet(ser, crc, 0x03, 0, 0)
     return
   
 

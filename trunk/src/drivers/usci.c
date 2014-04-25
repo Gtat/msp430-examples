@@ -34,7 +34,7 @@ void usci_set_mode
   P2DIR   = 0x01;
   P2OUT   = 0x00;
 
-  while(!(IFG2 & UCA0TXIFG));
+  usci_block_tx();
   UCA0CTL1 |= UCSWRST;
   UCA0CTL1 |= UCSSEL_2;
 
@@ -88,5 +88,17 @@ __attribute__((always_inline)) inline void usci_commit
   (void)
 {
   UC0IE |= UCA0TXIE;
+}
+
+__attribute__((always_inline)) inline void usci_block_tx
+  (void)
+{
+  while(!(IFG2 & UCA0TXIFG));
+}
+
+__attribute__((always_inline)) inline void usci_block_rx
+  (void)
+{
+  while(!(IFG2 & UCA0RXIFG));
 }
 
