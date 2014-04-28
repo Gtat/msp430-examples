@@ -130,7 +130,6 @@ static void flash_write
     while (!(FCTL3 & WAIT));
   } 
   r->available -= count;
-  P1OUT ^= 0x01;
 
   FCTL1 = FWKEY;
   while (FCTL3 & BUSY);
