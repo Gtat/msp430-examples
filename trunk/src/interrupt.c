@@ -20,7 +20,7 @@ __interrupt void usci_tx_isr
   UCA0TXBUF = RING_QUEUE_POP(outgoing_comm_q); 
   if (RING_QUEUE_EMPTY(outgoing_comm_q))
   {
-    IE2 &= ~UCA0TXIE;
+    UC0IE &= ~UCA0TXIE;
   }
 }
 

@@ -75,19 +75,14 @@ int main
   adc_setup(NUM_SIGNAL_CHS);
   usci_set_mode(USCI_MODE_RS232);
 #ifdef CONFIG_ENABLE_STORAGE_MODE
-  if (flash_record_init(&data_record,   
-                    (uint8_t *)&stored_data,
-                    sizeof(stored_data)) < 0)
-  {
-    while(1);
-  }
-  if (flash_record_init(&config_record, 
-                        (uint8_t *)&stored_parameters, 
-                        sizeof(stored_parameters)) < 0)
-  {
-    while(1);
-  }
-
+  flash_record_init
+    (&data_record,   
+     (uint8_t *)&stored_data,
+     sizeof(stored_data));
+  flash_record_init
+    (&config_record, 
+     (uint8_t *)&stored_parameters, 
+     sizeof(stored_parameters));
   if (flash_record_append(&data_record, 
                           RAM_CODE_PTR(test_vector), 
                           16) < 16)
@@ -110,12 +105,12 @@ int main
         while (!RING_QUEUE_EMPTY(sample_q))
         {
           build_status = build_mcu_packet(&mcu_packet, DATA, control.seconds);
-          send_mcu_packet(&mcu_packet);
+          send_mcu_packet(&mcu_packet, PACKET_OPT_NONE);
 #ifdef CONFIG_ENABLE_ALERTS
           if (build_status)
           {
             build_mcu_packet(&mcu_packet, ALERT, build_status);
-            send_mcu_packet(&mcu_packet);
+            send_mcu_packet(&mcu_packet, PACKET_OPT_BLOCK);
           }
 #endif /* #ifdef CONFIG_ALERTS_ACTIVE */
         }
@@ -125,18 +120,16 @@ int main
       case STATE_FLUSH:
       {
         build_mcu_packet(&mcu_packet, PREAMBLE, &config_record);
-        send_mcu_packet(&mcu_packet);
-        usci_block_tx();
+        send_mcu_packet(&mcu_packet, PACKET_OPT_BLOCK);
 
-        while (build_mcu_packet(&mcu_packet, STORED, &data_record) >= NUM_SIGNAL_CHS)
+        while (build_mcu_packet(&mcu_packet, STORED, &data_record) > 0)
         {
-          send_mcu_packet(&mcu_packet);
+          send_mcu_packet(&mcu_packet, PACKET_OPT_BLOCK);
           usci_block_tx();
         }
 
         build_mcu_packet(&mcu_packet, OK);
-        send_mcu_packet(&mcu_packet);
-        usci_block_tx();
+        send_mcu_packet(&mcu_packet, PACKET_OPT_BLOCK);
 
         control.state = STATE_IDLE;
         break;

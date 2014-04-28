@@ -127,12 +127,6 @@ union mcu_to_pc
   uint8_t bytes[sizeof(struct mcu_to_pc_format_t)];
 }; 
 
-uint8_t build_mcu_packet
-  (union mcu_to_pc * const p, enum mcu_id id, ...);
-
-unsigned int send_mcu_packet
-  (const union mcu_to_pc * const p);
-
 enum pc_packet_status
 {
   PC_PACKET_OK,
@@ -142,6 +136,19 @@ enum pc_packet_status
   PC_PACKET_DUMP,
   PC_PACKET_HALT,
 };
+
+enum packet_options
+{
+  PACKET_OPT_NONE,
+  PACKET_OPT_BLOCK,
+};
+
+int build_mcu_packet
+  (union mcu_to_pc * const p, enum mcu_id id, ...);
+
+unsigned int send_mcu_packet
+  (const union mcu_to_pc * const p,
+   enum packet_options opt);
 
 enum pc_packet_status process_pc_packet
   (union pc_to_mcu * const p);
