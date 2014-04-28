@@ -62,7 +62,7 @@ int flash_record_append
     }
     else
     {
-      chunk = min(chunk, rem);
+      chunk = min(chunk, FLASH_SEGMENT_SIZE - rem);
     }
     (*RAM_CODE_PTR(flash_write))(r, src + written, chunk);
   }
@@ -112,6 +112,7 @@ static void flash_erase_block
   FCTL1 = FWKEY | ERASE; /* erase will occur on next write */
   *p = 0;                /* dummy write */
   while (FCTL3 & BUSY);
+  FCTL3 = FWKEY | LOCK;
 }
 
 static void flash_write
@@ -120,14 +121,16 @@ static void flash_write
 {
   size_t i;
 
-  FCTL1 = FWKEY | BLKWRT | WRT; 
+  FCTL3 = FWKEY;
+  FCTL1 = FWKEY | WRT; 
 
   for (i = 0; i < count; ++i)
   {
-    r->available -= 1;
     *r->tail++ = *src++; 
     while (!(FCTL3 & WAIT));
   } 
+  r->available -= count;
+  P1OUT ^= 0x01;
 
   FCTL1 = FWKEY;
   while (FCTL3 & BUSY);

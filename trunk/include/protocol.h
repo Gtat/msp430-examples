@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include "global.h"
 #include "drivers/adc.h"
+#include "drivers/flash.h"
 #include "drivers/parameter.h"
 
 #define __PACK __attribute__((packed))
@@ -64,6 +65,14 @@ union mcu_to_pc
 {
   struct mcu_to_pc_format_t
   {
+    /* identifying information about the payload
+     * e.g. whether the methane readings are valid 
+     */
+    enum mcu_flags
+    {
+      AMPEROMETRY_CH_VALID = 0x1,
+    } flags : 4;
+
     enum mcu_id
     {
       DATA     = 0x0,
@@ -74,14 +83,6 @@ union mcu_to_pc
       ALERT    = 0xF,
     } id : 4;
 
-    /* identifying information about the payload
-     * e.g. whether the methane readings are valid 
-     */
-/*    enum mcu_flags
-    {
-      AMPEROMETRY_CH_VALID = 0x1,
-    } flags : 4;
-*/
     /* 6 bytes */
     union __PACK
     {
@@ -160,14 +161,19 @@ uint8_t crc8
 #endif
 
 #ifdef CONFIG_ENABLE_STORAGE_MODE
+  struct flash_record;
+
   struct storage_cell
   {
-    uint8_t flags     : 4;
-    long    timestamp : 12;
-    uint8_t samples[NUM_SIGNAL_CHS]; 
+    enum mcu_flags flags     : 4;
+    uint16_t       timestamp : 12;
+    uint8_t        samples[NUM_SIGNAL_CHS];
   };
   extern const struct storage_cell stored_data[CONFIG_MAX_STORED_SAMPLES]
     __attribute__(( section(".flash_storage") ));
+
+  size_t store_packet
+    (struct flash_record *r, union mcu_to_pc *p, enum mcu_flags flags);
 #endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 
 #endif /* __PROTOCOL_H_GUARD */

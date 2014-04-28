@@ -75,6 +75,7 @@ int main
   adc_setup(NUM_SIGNAL_CHS);
   usci_set_mode(USCI_MODE_RS232);
 #ifdef CONFIG_ENABLE_STORAGE_MODE
+  ram_routine_load();
   flash_record_init
     (&data_record,   
      (uint8_t *)&stored_data,
@@ -83,12 +84,6 @@ int main
     (&config_record, 
      (uint8_t *)&stored_parameters, 
      sizeof(stored_parameters));
-  if (flash_record_append(&data_record, 
-                          RAM_CODE_PTR(test_vector), 
-                          16) < 16)
-  {
-    while(1);
-  }
 #endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 
   while(1)
@@ -106,6 +101,9 @@ int main
         {
           build_status = build_mcu_packet(&mcu_packet, DATA, control.seconds);
           send_mcu_packet(&mcu_packet, PACKET_OPT_NONE);
+#ifdef CONFIG_ENABLE_STORAGE_MODE
+          store_packet(&data_record, &mcu_packet, 0);
+#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 #ifdef CONFIG_ENABLE_ALERTS
           if (build_status)
           {
@@ -125,7 +123,6 @@ int main
         while (build_mcu_packet(&mcu_packet, STORED, &data_record) > 0)
         {
           send_mcu_packet(&mcu_packet, PACKET_OPT_BLOCK);
-          usci_block_tx();
         }
 
         build_mcu_packet(&mcu_packet, OK);

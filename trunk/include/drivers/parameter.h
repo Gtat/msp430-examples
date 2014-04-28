@@ -35,6 +35,9 @@ enum rate_flags
   RATE_FLAGS_STIMULUS,
 };
 
+//#ifdef CONFIG_ENABLE_STORAGE_MODE
+//  struct flash_record;
+//#endif
 #ifdef CONFIG_ENABLE_DYNAMIC_BIASING
 struct amperometry_info
 {
@@ -51,6 +54,9 @@ extern struct parameter_t
   union  dac_word         voltages[NUM_DAC_CHS];
   uint8_t                 flags;
   struct rate_info        rates;
+#ifdef CONFIG_ENABLE_STORAGE_MODE
+//  struct flash_record     data_record;
+#endif
 #ifdef CONFIG_ENABLE_DYNAMIC_BIASING
   struct amperometry_info amperometry;
 #endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
