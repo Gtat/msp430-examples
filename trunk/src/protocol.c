@@ -28,7 +28,7 @@ const struct storage_cell stored_data[CONFIG_MAX_STORED_SAMPLES];
  * @param id  the type/ID of the packet
  * @param ... additional parameters specific to the packet type
  */
-uint8_t build_mcu_packet
+int build_mcu_packet
   (union mcu_to_pc * const p, enum mcu_id id, ...)
 {
   va_list ap;
@@ -99,10 +99,10 @@ uint8_t build_mcu_packet
       struct flash_record *r;
   
       r = va_arg(ap, struct flash_record *); 
-      flash_record_destructive_read(r, 
-                                    (uint8_t * const)&p->command.payload.samples,
-                                    NUM_SIGNAL_CHS);
-      ret = r->length - r->available;
+      ret = flash_record_destructive_read
+              (r, 
+               (uint8_t * const)&p->command.payload.samples,
+               sizeof(p->command.payload.samples));
     }
 #endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
     case OK:
@@ -150,14 +150,22 @@ uint8_t build_mcu_packet
  * @returns  the number of bytes committed
  */
 unsigned int send_mcu_packet
-  (const union mcu_to_pc * const p)
+  (const union mcu_to_pc * const p,
+   enum packet_options opt)
 {
   unsigned int i;
   for (i = 0; i < sizeof(union mcu_to_pc); ++i)
   {
     usci_write(p->bytes[i]);
   }
-  usci_commit();
+  if (opt == PACKET_OPT_BLOCK)
+  {
+    usci_commit_blocking();
+  }
+  else
+  {
+    usci_commit();
+  }
 
   return i;
 }

@@ -82,24 +82,24 @@ int flash_record_destructive_read
   {
     if (r->available == r->length)
     {
-      return -FLASH_ERR_NO_SPACE;
+      break;
     }
 
     old_segment = (uint8_t *)ALIGN_DOWN(r->head, FLASH_SEGMENT_SIZE);
     rem = FLASH_SEGMENT_SIZE - BIN_POW_MOD(r->head, FLASH_SEGMENT_SIZE);
-    chunk = max(count, r->length - r->available);
+    chunk = min(count, r->length - r->available);
     chunk = min(chunk, rem);
 
-    for (i = read; i < chunk; ++i)
+    for (i = read; i < read + chunk; i++)
     {
       dst[i] = *r->head++;
-      ++r->available;
     }
 
     if (old_segment != (uint8_t *)ALIGN_DOWN(r->head, FLASH_SEGMENT_SIZE))
     {
       (*RAM_CODE_PTR(flash_erase_block))(old_segment);
-    }
+    } 
+    r->available += chunk;
   }
   return read;
 }
@@ -120,11 +120,11 @@ static void flash_write
 {
   size_t i;
 
-  FCTL1 = FWKEY | WRT; 
+  FCTL1 = FWKEY | BLKWRT | WRT; 
 
   for (i = 0; i < count; ++i)
   {
-    --r->available;
+    r->available -= 1;
     *r->tail++ = *src++; 
     while (!(FCTL3 & WAIT));
   } 

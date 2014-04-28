@@ -30,7 +30,8 @@ void usci_write
 
 inline void usci_commit
   (void);
-
+void usci_commit_blocking
+  (void);
 inline void usci_block_tx
   (void);
 inline void usci_block_rx

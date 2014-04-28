@@ -90,6 +90,13 @@ __attribute__((always_inline)) inline void usci_commit
   UC0IE |= UCA0TXIE;
 }
 
+void usci_commit_blocking
+  (void)
+{
+  UC0IE |= UCA0TXIE;
+  while (UC0IE & UCA0TXIE);
+}
+
 __attribute__((always_inline)) inline void usci_block_tx
   (void)
 {

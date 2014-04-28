@@ -78,11 +78,11 @@ SECTIONS
      . = ALIGN(2);
   }  > REGION_TEXT
    _etext = .; /* Past last read-only (loadable) segment */
+
   .flash_storage :
   {
     . = ALIGN(__flash_segment_size);
     __start_flash_storage = .;
-
     parameter.o (.flash_storage)
     . = ALIGN(__flash_segment_size);
     protocol.o  (.flash_storage)
@@ -90,6 +90,7 @@ SECTIONS
 
     __end_flash_storage = .;
   } > REGION_TEXT
+
   .data   :
   {
      . = ALIGN(2);
