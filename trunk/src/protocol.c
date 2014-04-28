@@ -87,11 +87,13 @@ int build_mcu_packet
 #ifdef CONFIG_ENABLE_STORAGE_MODE
     case PREAMBLE:
     {
-      struct parameter_t * c;
+      p->command.payload.preamble.flags = parameters.flags;
+      p->command.payload.preamble.rates = parameters.rates;
+//      struct parameter_t * c;
      
-      c = (struct parameter_t *)va_arg(ap, struct flash_record *);
-      p->command.payload.preamble.flags = c->flags;
-      p->command.payload.preamble.rates = c->rates;
+//      c = (struct parameter_t *)va_arg(ap, struct flash_record *);
+//      p->command.payload.preamble.flags = c->flags;
+//      p->command.payload.preamble.rates = c->rates;
       break;
     }
     case STORED:
@@ -209,7 +211,7 @@ enum pc_packet_status process_pc_packet
     }
     case SET_VOLTAGE:
     {
-      parameters.voltages[p->command.payload.dac_setting.formatted.channel] =
+      CONFIGURATION.voltages[p->command.payload.dac_setting.formatted.channel] =
         p->command.payload.dac_setting;
       break;
     }

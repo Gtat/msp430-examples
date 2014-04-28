@@ -7,9 +7,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "protocol.h"
-#include "drivers/parameter.h"
-
 struct flash_record
 {
   uint8_t * origin;
@@ -30,9 +27,7 @@ extern const uint8_t __end_flash_storage;
 #define FLASH_ADDR_HI (&__end_flash_storage)
 
 #define FLASH_ADDR_RANGE               \
-  ((size_t)( sizeof(stored_parameters) \
-           + sizeof(stored_data)       \
-           ))
+  ((size_t)(FLASH_ADDR_HI - FLASH_ADDR_LO))
 
 #define BIN_POW_MOD(ptr, boundary) \
   ((size_t)(ptr) & ((boundary)-1))

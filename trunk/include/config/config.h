@@ -31,6 +31,9 @@ struct parameter_t parameters =
     {
       #include "config/dac_voltages.h"
     },
+#ifdef CONFIG_ENABLE_STORAGE_MODE
+    .data_record = { 0 },
+#endif /* CONFIG_ENABLE_STORAGE_MODE */
 #ifdef CONFIG_ENABLE_DYNAMIC_BIASING
     .amperometry =
     {

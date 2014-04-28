@@ -1,4 +1,3 @@
-  __ram_code_length = 0x100;
   /* Provide a section for continuous storage of code that must be executed
    * from RAM
    */
