@@ -22,7 +22,7 @@ inline void update_rates
   {
     case RATE_FLAGS_ADC:
     {
-      TACCR0 = TACCR1 = parameters.rates.scan_rate = taccr;
+      TACCR0 = TACCR1 = CONFIGURATION.rates.scan_rate = taccr;
       break;
     }
     default:

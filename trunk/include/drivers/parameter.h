@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include "global.h"
 #include "processing.h"
+#include "drivers/flash.h"
+#include "ram_symbols.h"
 
 #define NUM_DAC_CHS 4
 
@@ -35,9 +37,6 @@ enum rate_flags
   RATE_FLAGS_STIMULUS,
 };
 
-//#ifdef CONFIG_ENABLE_STORAGE_MODE
-//  struct flash_record;
-//#endif
 #ifdef CONFIG_ENABLE_DYNAMIC_BIASING
 struct amperometry_info
 {
@@ -49,20 +48,24 @@ struct amperometry_info
 };
 #endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
 
-extern struct parameter_t
+#ifdef CONFIG_ENABLE_STORAGE_MODE
+struct flash_record;
+#endif
+
+struct parameter_t
 {
   union  dac_word         voltages[NUM_DAC_CHS];
   uint8_t                 flags;
   struct rate_info        rates;
 #ifdef CONFIG_ENABLE_STORAGE_MODE
-//  struct flash_record     data_record;
+  struct flash_record     data_record;
 #endif
 #ifdef CONFIG_ENABLE_DYNAMIC_BIASING
   struct amperometry_info amperometry;
 #endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
   struct processor        process;
   struct processor        alarm;
-} parameters;
+};
 
 void update_rates
   (enum rate_flags flags, uint16_t taccr);
@@ -78,10 +81,17 @@ inline void amperometry_on
 void amperometry_off
   (void);
 
-#ifdef CONFIG_ENABLE_STORAGE_MODE
-extern const struct parameter_t stored_parameters
-  __attribute__ (( section(".flash_storage") ));
-#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
+#ifdef CONFIG_ENABLE_FLASH_PARAMS
+//extern const struct parameter_t stored_parameters
+//  __attribute__ (( section(".flash_storage") ));
+  extern struct parameter_t parameters
+    __attribute__ (( section(".ram_symbols") ));
+# define CONFIGURATION (*RAM_CODE_PTR(parameters))
+#else  /* #ifdef CONFIG_ENABLE_FLASH_PARAMS */
+  extern struct parameter_t parameters;
+
+# define CONFIGURATION parameters
+#endif /* #ifdef CONFIG_ENABLE_FLASH_PARAMS */
 
 #endif  /* __DRIVERS_PARAMETER_H_GUARD */
 

@@ -58,8 +58,6 @@ union mcu_to_pc mcu_packet;
 union pc_to_mcu  pc_packet;
 
 #ifdef CONFIG_ENABLE_STORAGE_MODE
-struct flash_record config_record = { 0 };
-struct flash_record data_record   = { 0 };
 #endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 
 uint8_t test_vector[] __attribute__ (( section(".ram_symbols") )) =
@@ -76,14 +74,13 @@ int main
   usci_set_mode(USCI_MODE_RS232);
 #ifdef CONFIG_ENABLE_STORAGE_MODE
   ram_routine_load();
-  flash_record_init
-    (&data_record,   
-     (uint8_t *)&stored_data,
-     sizeof(stored_data));
-  flash_record_init
-    (&config_record, 
-     (uint8_t *)&stored_parameters, 
-     sizeof(stored_parameters));
+  if (!parameters.data_record.length)
+  {
+    flash_record_init
+      (&parameters.data_record,   
+       (uint8_t *)&stored_data,
+       sizeof(stored_data));
+  }
 #endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 
   while(1)
@@ -102,7 +99,7 @@ int main
           build_status = build_mcu_packet(&mcu_packet, DATA, control.seconds);
           send_mcu_packet(&mcu_packet, PACKET_OPT_NONE);
 #ifdef CONFIG_ENABLE_STORAGE_MODE
-          store_packet(&data_record, &mcu_packet, 0);
+          store_packet(&parameters.data_record, &mcu_packet, 0);
 #endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 #ifdef CONFIG_ENABLE_ALERTS
           if (build_status)
@@ -117,10 +114,12 @@ int main
 #ifdef CONFIG_ENABLE_STORAGE_MODE
       case STATE_FLUSH:
       {
-        build_mcu_packet(&mcu_packet, PREAMBLE, &config_record);
+        build_mcu_packet(&mcu_packet, PREAMBLE);
         send_mcu_packet(&mcu_packet, PACKET_OPT_BLOCK);
 
-        while (build_mcu_packet(&mcu_packet, STORED, &data_record) > 0)
+        while (build_mcu_packet(&mcu_packet, 
+                                STORED, 
+                                &parameters.data_record) > 0)
         {
           send_mcu_packet(&mcu_packet, PACKET_OPT_BLOCK);
         }
