@@ -99,10 +99,16 @@ int build_mcu_packet
       struct flash_record *r;
   
       r = va_arg(ap, struct flash_record *); 
+      /* overwrite the ID field to use all the packet space we can. 
+       * stored flags are now the high order bits, and it should be
+       * guaranteed that these are never equal to the ID code for the
+       * OK packet, which signals the end of the dump.
+       */ 
       ret = flash_record_destructive_read
               (r, 
-               (uint8_t * const)&p->command.payload.samples,
-               sizeof(p->command.payload.samples));
+               (uint8_t * const)&p->bytes, 
+               sizeof(union mcu_to_pc)-1);
+      break;
     }
 #endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
     case OK:
@@ -282,4 +288,27 @@ uint8_t crc8
   return crc;
 }
 #endif
+
+#ifdef CONFIG_ENABLE_STORAGE_MODE
+
+size_t store_packet
+  (struct flash_record *r, union mcu_to_pc *p, enum mcu_flags flags)
+{
+  static uint16_t timestamp = 0;
+  uint16_t tag;
+  size_t   ret;
+
+  tag  = (timestamp & ~((1 << 12)-1)); /* mask down to LO 12 bits */
+  tag |= flags;
+  timestamp++;
+
+  ret  = flash_record_append(r, (uint8_t * const)&tag, sizeof(tag));
+  flash_record_append
+           (r, 
+            (uint8_t * const)&p->command.payload.samples,
+            sizeof(p->command.payload.samples));
+  return ret;
+}
+
+#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 

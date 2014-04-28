@@ -10,6 +10,7 @@ SOURCES  = main.c         \
            parameter.c    \
            processing.c   \
            ram_symbols.c
+
 VPATH    = src/drivers:src
 BUILDDIR = build/
 ASMDIR   = asm

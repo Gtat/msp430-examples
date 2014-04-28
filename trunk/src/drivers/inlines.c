@@ -19,7 +19,6 @@ static inline void setup
 
 #ifdef CONFIG_ENABLE_STORAGE_MODE
   FCTL2 = FWKEY | FSSEL1 | FN0; /* flash is clocked with SMCLK/2 */
-  ram_routine_load();
 #endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 }
 

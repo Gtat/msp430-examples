@@ -20,9 +20,9 @@ extern uint8_t ram_code[RAM_CODE_LENGTH]
 
 #define OFFSET_OF_RAM_SYMBOL(ptr) \
   ((size_t)(ptr) - (size_t)&ram_code_rom_begin)
-#define RAM_CODE_PTR(s)                                              \
+#define RAM_CODE_PTR(s)                                                \
   ({                                                                   \
-     typeof(&s) __p;                                                   \
+     typeof(&s) __p __attribute__(( unused ));                         \
      __p = (typeof(&s))((size_t)&ram_code + OFFSET_OF_RAM_SYMBOL(&s)); \
   })
 

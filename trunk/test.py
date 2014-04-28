@@ -60,21 +60,29 @@ def main(serial_path):
 #    send_packet(ser, crc, 0x05, 0x99, 0x19)
 
     # CAPTURE message
-#    raw_input()
-#    send_packet(ser, crc, 0x02, 0, 0)
-    # DUMP message
     raw_input()
-    send_packet(ser, crc, 0x01, 0, 0)
+    send_packet(ser, crc, 0x02, 0, 0)
+    # DUMP message
+    #raw_input()
+    #send_packet(ser, crc, 0x01, 0, 0)
 
     while True:
       parse_packet(ser, buf, crc)
 
   except KeyboardInterrupt:
     print '^C'
-    # HALT message
-    send_packet(ser, crc, 0x03, 0, 0)
-    return
-  
+
+  # HALT message
+  send_packet(ser, crc, 0x03, 0, 0)
+
+  # DUMP message
+  send_packet(ser, crc, 0x01, 0, 0)
+
+  try:
+    while True:
+      parse_packet(ser, buf, crc)
+  except KeyboardInterrupt:
+    print '^C'
 
 if __name__ == '__main__':
   main('/dev/ttyACM0')
