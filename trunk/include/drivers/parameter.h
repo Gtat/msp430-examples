@@ -18,7 +18,7 @@ union __attribute__((packed)) dac_word
   {
     uint8_t range   : 1;
     uint8_t channel : 2;
-    char            : 5;
+    char    padding : 5;
     uint8_t data;
   } formatted;
   uint8_t bytes[sizeof(struct dac_format_t)];
