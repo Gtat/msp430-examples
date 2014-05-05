@@ -92,7 +92,6 @@ union mcu_to_pc
       {
         uint8_t          flags;
         struct rate_info rates;
-        uint8_t others[];
       } preamble;
 
       struct __PACK
@@ -118,7 +117,7 @@ union mcu_to_pc
         uint8_t  data[3];
       } alert;                        /* for ALERT packets */
   
-      uint8_t empty;
+      uint8_t padding;
     } payload;
     
     /* 1 byte */

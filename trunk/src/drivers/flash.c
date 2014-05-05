@@ -1,3 +1,13 @@
+/**
+ * @file    flash.c
+ * @author  Sam Boling <charles.samuel.boling@gmail.com>
+ * @version 0.1
+ *
+ * @section DESCRIPTION
+ *
+ * Management routines for accessing flash ROM on the MSP430G2553.
+ *
+ */
 #include "global.h"
 
 #ifdef CONFIG_ENABLE_STORAGE_MODE
@@ -8,7 +18,7 @@
 
 /* forward declarations for operations that must reside in RAM */
 static void flash_erase_block 
-  (uint8_t *p)
+  (uint8_t * const p)
   __attribute__(( section(".ram_symbols") 
                 , noinline 
                ));
@@ -106,7 +116,7 @@ int flash_record_destructive_read
 
 /* operations that must reside in RAM */
 static void flash_erase_block  
-  (uint8_t *p)
+  (uint8_t * const p)
 {
   FCTL3 = FWKEY;         /* clear flash lock */
   FCTL1 = FWKEY | ERASE; /* erase will occur on next write */

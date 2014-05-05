@@ -4,8 +4,8 @@
 #include "global.h"
 
 #ifdef CONFIG_ENABLE_STORAGE_MODE
-#include <stdint.h>
-#include <stddef.h>
+#include <stdint.h> /* for uint8_t, uint16_t */
+#include <stddef.h> /* for size_t */
 
 struct flash_record
 {
@@ -17,9 +17,8 @@ struct flash_record
   size_t    available;
 };
 
-#define FLASH_SEGMENT_SIZE   ((uint16_t)0x200)
-#define FLASH_BLOCK_SIZE     ((uint16_t)0x40)
-#define FLASH_STORAGE_LENGTH ((uint16_t)0x400)
+#define FLASH_SEGMENT_SIZE ((size_t)0x200)
+#define FLASH_BLOCK_SIZE   ((size_t)0x40)
 
 extern const uint8_t __start_flash_storage;
 extern const uint8_t __end_flash_storage;
