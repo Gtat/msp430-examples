@@ -32,6 +32,7 @@ inline void update_rates
   }
 }
 
+#ifdef CONFIG_ENABLE_DAC_BIASING
 /**
  *  Blocking operation to send a 16-bit configuration word over SPI to
  *  configure a new voltage setting on the TI TLV5620 4-channel DAC.
@@ -85,4 +86,5 @@ void amperometry_off
   TA1CCTL0 &= ~CCIE;
 }
 #endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
+#endif /* #ifdef CONFIG_ENABLE_DAC_BIASING */
 

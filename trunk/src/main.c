@@ -154,7 +154,9 @@ int main
 #endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
         case PC_PACKET_BEGIN:
         {
+#ifdef CONFIG_ENABLE_DAC_BIASING
           set_all_dac_voltages();
+#endif /* #ifdef CONFIG_ENABLE_DAC_BIASING */
           control.state = STATE_STREAM;
           break;
         }

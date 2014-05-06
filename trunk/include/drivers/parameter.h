@@ -54,7 +54,9 @@ struct flash_record;
 
 struct parameter_t
 {
+#ifdef CONFIG_ENABLE_DAC_BIASING
   union  dac_word         voltages[NUM_DAC_CHS];
+#endif /* #ifdef CONFIG_ENABLE_DAC_BIASING */
   uint8_t                 flags;
   struct rate_info        rates;
 #ifdef CONFIG_ENABLE_STORAGE_MODE
@@ -70,16 +72,19 @@ struct parameter_t
 void update_rates
   (enum rate_flags flags, uint16_t taccr);
 
+#ifdef CONFIG_ENABLE_DAC_BIASING
 void set_dac_voltage
   (union dac_word setting);
-
 void set_all_dac_voltages
   (void);
 
+#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
 inline void amperometry_on
   (void);
 void amperometry_off
   (void);
+#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
+#endif /* #ifdef CONFIG_ENABLE_DAC_BIASING */
 
 #ifdef CONFIG_ENABLE_FLASH_PARAMS
 //extern const struct parameter_t stored_parameters
