@@ -1,3 +1,6 @@
+import sys
+sys.path.append("../../gui/PyModules")
+
 import collections
 import itertools
 
@@ -5,16 +8,16 @@ import serial
 import struct
 import crcmod
 
+import packets
+
 BYTES_PER_INCOMING_PACKET = 8
 
-def send_packet(port, checker, *args):
-  packet = struct.pack('BBB', *args)
-  check  = struct.pack('B', checker(packet))
-  print 'SEND ',
-  for x in (packet + check):
-    print '%02x ' % ord(x),
-  print
-  port.write(packet + check)
+def send_packet(port, checker, *args, **kwargs):
+  packet = packets.build_pc_packet(checker, *args, **kwargs)
+  for x in buffer(packet)[:]:
+   print '%02x ' % ord(x),
+  print  
+  port.write(buffer(packet)[:])
 
 def parse_packet(ser, buf, crc):
   buf.appendleft(ser.read())
@@ -57,14 +60,12 @@ def main(serial_path):
   try:
     # SET_RATES to 2 Hz
 #    raw_input()
-#    send_packet(ser, crc, 0x05, 0x99, 0x19)
+#    send_packet(ser, crc, "SET_RATES", taccr=0x1999)
 
-    # CAPTURE message
     raw_input()
-    send_packet(ser, crc, 0x02, 0, 0)
-    # DUMP message
-    #raw_input()
-    #send_packet(ser, crc, 0x01, 0, 0)
+    send_packet(ser, crc, "CAPTURE")
+#    raw_input()
+#    send_packet(ser, crc, "DUMP")
 
     while True:
       parse_packet(ser, buf, crc)
@@ -72,11 +73,9 @@ def main(serial_path):
   except KeyboardInterrupt:
     print '^C'
 
-  # HALT message
-  send_packet(ser, crc, 0x03, 0, 0)
+  send_packet(ser, crc, "HALT")
 
-  # DUMP message
-  send_packet(ser, crc, 0x01, 0, 0)
+#  send_packet(ser, crc, "DUMP")
 
   try:
     while True:
