@@ -209,12 +209,14 @@ enum pc_packet_status process_pc_packet
       adc_off();
       return PC_PACKET_HALT;
     }
+#ifdef CONFIG_ENABLE_DAC_BIASING
     case SET_VOLTAGE:
     {
       CONFIGURATION.voltages[p->command.payload.dac_setting.formatted.channel] =
         p->command.payload.dac_setting;
       break;
     }
+#endif /* #ifdef CONFIG_ENABLE_DAC_BIASING */
     case SET_RATES:
     {
       update_rates(0, p->command.payload.taccr);

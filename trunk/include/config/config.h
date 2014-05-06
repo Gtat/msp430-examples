@@ -27,10 +27,12 @@ struct parameter_t parameters =
     {
       .scan_rate = 0xF424,
     },
+#ifdef CONFIG_ENABLE_DAC_BIASING
     .voltages =
     {
       #include "config/dac_voltages.h"
     },
+#endif /* #ifdef CONFIG_ENABLE_DAC_BIASING */
 #ifdef CONFIG_ENABLE_STORAGE_MODE
     .data_record = { 0 },
 #endif /* CONFIG_ENABLE_STORAGE_MODE */

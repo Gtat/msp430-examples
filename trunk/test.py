@@ -14,10 +14,10 @@ BYTES_PER_INCOMING_PACKET = 8
 
 def send_packet(port, checker, *args, **kwargs):
   packet = packets.build_pc_packet(checker, *args, **kwargs)
-  for x in buffer(packet)[:]:
+  for x in packet:
    print '%02x ' % ord(x),
   print  
-  port.write(buffer(packet)[:])
+  port.write(packet)
 
 def parse_packet(ser, buf, crc):
   buf.appendleft(ser.read())
