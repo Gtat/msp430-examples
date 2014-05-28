@@ -29,10 +29,6 @@ def parse_packet(ser, buf, crc):
       print '%02x ' % ord(x),
       packet.append(x)          
 
-    # human-readable voltages
-#    for x in packet[1:-2]:
-#      print '%0.03f' % ((ord(x) / 255.0) * 3.5),
-
     check = crc(''.join(packet[:-1]))
     if ord(packet[-1]) != check:
       print '\t\tCRC FAIL: %02x vs %02x' % (ord(packet[-1]), check)

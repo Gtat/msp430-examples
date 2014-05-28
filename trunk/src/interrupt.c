@@ -36,9 +36,7 @@ __interrupt void usci_rx_isr
 {
   if (UCA0CTL0 & UCSYNC) /* SPI mode */
   {
-    UCA0RXBUF;           /* dummy read to clear interrupt */
-                         /* this works because TI's header file defines every */
-                         /* register as volatile, grumble grumble */
+    (volatile char)UCA0RXBUF; /* dummy read to clear interrupt */
     if (RING_QUEUE_EMPTY(outgoing_comm_q))
     {
       __bic_SR_register_on_exit(LPM0_bits);

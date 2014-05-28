@@ -57,12 +57,6 @@ RING_QUEUE_CREATE_PREDEFINED(sample_buffer,  4, sample_q);
 union mcu_to_pc mcu_packet;
 union pc_to_mcu  pc_packet;
 
-#ifdef CONFIG_ENABLE_STORAGE_MODE
-#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
-
-uint8_t test_vector[] __attribute__ (( section(".ram_symbols") )) =
-  "0123456789abcdef";
-
 int main
   (void)
 {
@@ -72,6 +66,7 @@ int main
   setup();                                     /* system setup */
   adc_setup(NUM_SIGNAL_CHS);
   usci_set_mode(USCI_MODE_RS232);
+
 #ifdef CONFIG_ENABLE_STORAGE_MODE
   ram_routine_load();
   if (!parameters.data_record.length)

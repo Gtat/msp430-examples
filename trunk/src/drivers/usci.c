@@ -100,12 +100,12 @@ void usci_commit_blocking
 __attribute__((always_inline)) inline void usci_block_tx
   (void)
 {
-  while(!(IFG2 & UCA0TXIFG));
+  while(!(UC0IFG & UCA0TXIFG));
 }
 
 __attribute__((always_inline)) inline void usci_block_rx
   (void)
 {
-  while(!(IFG2 & UCA0RXIFG));
+  while(!(UC0IFG & UCA0RXIFG));
 }
 
