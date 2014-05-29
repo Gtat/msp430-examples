@@ -56,7 +56,7 @@ union __PACK pc_to_mcu
   } command;
 
   uint8_t bytes[sizeof(struct pc_to_mcu_format_t)];
-} __attribute__((packed));
+};
 
 /** \union mcu_command
  *  The format for messages from the microcontroller.
