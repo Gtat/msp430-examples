@@ -67,12 +67,12 @@ int build_mcu_packet
           /* first perform the currently configured processing, or */
           /* truncate to 8 bits by default. */
           p->command.payload.samples[ch] = 
-            (*(parameters.process.execute ? : &execute_truncate_sample))
-               (sample_q.data[sample_q.tail][index], /* the channel's sample */
-                ch,
-                &parameters.process);                /* optional argument */
+            (parameters.process.execute ? : &execute_truncate_sample)
+              (sample_q.data[sample_q.tail][index], /* the channel's sample */
+               ch,
+               &parameters.process);                /* optional argument */
           ret |= 
-            (*(parameters.alarm.execute ? : &execute_nothing))
+            (parameters.alarm.execute ? : &execute_nothing)
               (sample_q.data[sample_q.tail][index], 
                ch,
                &parameters.alarm);
@@ -89,11 +89,6 @@ int build_mcu_packet
     {
       p->command.payload.preamble.flags = parameters.flags;
       p->command.payload.preamble.rates = parameters.rates;
-//      struct parameter_t * c;
-     
-//      c = (struct parameter_t *)va_arg(ap, struct flash_record *);
-//      p->command.payload.preamble.flags = c->flags;
-//      p->command.payload.preamble.rates = c->rates;
       break;
     }
     case STORED:
@@ -302,7 +297,7 @@ size_t store_packet
   uint16_t tag;
   size_t   ret;
 
-  tag  = (timestamp & ~((1 << 12)-1)); /* mask down to LO 12 bits */
+  tag  = (timestamp & ((1 << 12)-1)); /* mask down to LO 12 bits */
   tag |= flags;
   timestamp++;
 

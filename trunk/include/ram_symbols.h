@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define RAM_CODE_LENGTH 0x100
+#define RAM_CODE_LENGTH 0x80
 extern uint8_t ram_code_rom_begin;
 extern uint8_t ram_code_rom_end;
 extern uint8_t ram_code[RAM_CODE_LENGTH]

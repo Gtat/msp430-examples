@@ -19,14 +19,14 @@
 /* forward declarations for operations that must reside in RAM */
 static void flash_erase_block 
   (uint8_t * const p)
-  __attribute__(( section(".ram_symbols") 
+  __attribute__(( section(".ram_symbols_in_rom")
                 , noinline 
                ));
 
 static void flash_write
   (struct flash_record * r,
    const uint8_t * src, size_t count)
-  __attribute__(( section(".ram_symbols") 
+  __attribute__(( section(".ram_symbols_in_rom")
                 , noinline 
                )); 
 
