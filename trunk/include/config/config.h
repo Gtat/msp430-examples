@@ -25,7 +25,7 @@ struct parameter_t parameters =
     .alarm    = { 0 },
     .rates    =
       {
-        .scan_rate = 0x5000, //0xF424,
+        .scan_rate = 0x1000,
       },
 #ifdef CONFIG_ENABLE_DAC_BIASING
     .voltages =
