@@ -214,7 +214,7 @@ enum pc_packet_status process_pc_packet
 #endif /* #ifdef CONFIG_ENABLE_DAC_BIASING */
     case SET_RATES:
     {
-      update_rates(0, p->command.payload.taccr);
+      update_rates(RATE_FLAGS_ADC, p->command.payload.taccr);
       break;
     }
     case SET_MARGIN:

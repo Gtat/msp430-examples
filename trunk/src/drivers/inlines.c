@@ -69,8 +69,8 @@ static inline void adc_setup
 
   /* SET TIMER PWM FOR ADC10 TRIGGER! */
   TA0CCTL1 = OUTMOD_3;                  /* When counter == TACCR1, set output. */
-                                       /* When counter == TACCR0, clear output. */
-  update_rates(0, 0x8000 / channels);  /* 32768 / 32.768 kHz = 1.0 s */
+                                        /* When counter == TACCR0, clear output. */
+  update_rates(RATE_FLAGS_ADC, 0x1000);
 
   while (ADC10CTL1 & BUSY);
   ADC10DTC0  = 0;

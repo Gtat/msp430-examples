@@ -21,11 +21,11 @@
 
 struct parameter_t parameters =
   {
-    .process  = INIT_PROCESSOR(moving_average),
+    .process  = INIT_PROCESSOR(truncate_sample),
     .alarm    = { 0 },
     .rates    =
       {
-        .scan_rate = 0xF424,
+        .scan_rate = 0x927c,
       },
 #ifdef CONFIG_ENABLE_DAC_BIASING
     .voltages =
