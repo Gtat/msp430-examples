@@ -5,7 +5,7 @@ EXPAND_PROCESSOR(truncate_sample, {})
 
 #define include_moving_average
 #ifdef include_moving_average
-  #define MOVING_AVG_LENGTH 16
+  #define MOVING_AVG_LENGTH 32
   EXPAND_PROCESSOR(moving_average, 
                    {
                      uint8_t  samples[NUM_SIGNAL_CHS][MOVING_AVG_LENGTH];

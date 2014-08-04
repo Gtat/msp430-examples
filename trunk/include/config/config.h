@@ -21,7 +21,7 @@
 
 struct parameter_t parameters =
   {
-    .process  = INIT_PROCESSOR(truncate_sample),
+    .process  = INIT_PROCESSOR(moving_average),
     .alarm    = { 0 },
     .rates    =
       {
