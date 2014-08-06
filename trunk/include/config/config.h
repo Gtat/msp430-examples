@@ -4,16 +4,18 @@
 #define bswap16(x) \
   (((x) << 8)|((x) >> 8))
 
-#define FORMAT_DAC_VOLTAGE(ch, volts)            \
-  {                                              \
-    .formatted =                                 \
-      {                                          \
-        .channel = (ch),                         \
-        .range   = ((volts) >= 1.0),             \
-        .data    = (uint8_t)(((volts) < 1.0)     \
-                           ? ((volts) * 256.0)   \
-                           : ((volts) * 128.0)), \
-      },                                         \
+#define DAC_V_REF 2.5
+
+#define FORMAT_DAC_VOLTAGE(ch, volts)                        \
+  {                                                          \
+    .formatted =                                             \
+      {                                                      \
+        .channel = (ch),                                     \
+        .range   = ((volts) >= 1.0),                         \
+        .data    = (uint8_t)(((volts) < 1.0)                 \
+                           ? ((volts) * 256.0 / (DAC_V_REF))   \
+                           : ((volts) * 128.0 / (DAC_V_REF))), \
+      },                                                     \
   }
 
 #define SET_DAC_VOLTAGE_ARRAY(ch, volts)       \
@@ -39,8 +41,8 @@ struct parameter_t parameters =
 #ifdef CONFIG_ENABLE_DYNAMIC_BIASING
     .amperometry =
       {
-        .hi_volts = FORMAT_DAC_VOLTAGE(0, 1.5),
-        .lo_volts = FORMAT_DAC_VOLTAGE(0, 0.5),
+        .hi_volts = FORMAT_DAC_VOLTAGE(2, 3.2),
+        .lo_volts = FORMAT_DAC_VOLTAGE(2, 1),
         .hi_seconds = 6,
         .lo_seconds = 10,
       },
