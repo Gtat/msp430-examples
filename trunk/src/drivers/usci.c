@@ -109,3 +109,11 @@ __attribute__((always_inline)) inline void usci_block_rx
   while(!(UC0IFG & UCA0RXIFG));
 }
 
+__attribute__((always_inline)) inline void usci_break
+  (void)
+{
+  UCA0CTL1 |= UCTXBRK;
+  RING_QUEUE_PUSH(outgoing_comm_q, 0x55);
+  usci_commit_blocking();
+}
+

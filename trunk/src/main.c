@@ -161,6 +161,7 @@ int main
 #ifdef CONFIG_ENABLE_DYNAMIC_BIASING
           amperometry_off();
 #endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
+          usci_break();
           control.state = STATE_IDLE;
           break;
         }
