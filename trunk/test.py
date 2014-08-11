@@ -1,6 +1,5 @@
 import sys
 sys.path.append("../../gui/PyModules")
-
 import collections
 import itertools
 

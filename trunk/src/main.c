@@ -152,6 +152,8 @@ int main
 #ifdef CONFIG_ENABLE_DAC_BIASING
           set_all_dac_voltages();
 #endif /* #ifdef CONFIG_ENABLE_DAC_BIASING */
+          build_mcu_packet(&mcu_packet, OK);
+          send_mcu_packet(&mcu_packet, PACKET_OPT_BLOCK);
 
           control.state = STATE_STREAM;
           break;
