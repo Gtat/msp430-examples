@@ -110,6 +110,7 @@ int build_mcu_packet
 #endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
     case OK:
     {
+      p->command.payload.preamble.flags = ADC_CH_MASK;
       break;
     }
     case ALERT:
@@ -190,6 +191,10 @@ enum pc_packet_status process_pc_packet
 
   switch (p->command.id)
   {
+    case HELLO:
+    {
+      return PC_PACKET_HELLO;
+    }  
     case DUMP:
     {
       return PC_PACKET_DUMP;

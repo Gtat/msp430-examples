@@ -129,6 +129,7 @@ union mcu_to_pc
 
 enum pc_packet_status
 {
+  PC_PACKET_HELLO,
   PC_PACKET_OK,
   PC_PACKET_EMPTY,
   PC_PACKET_BAD_CRC,

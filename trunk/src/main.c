@@ -140,6 +140,13 @@ int main
       packet_status = process_pc_packet(&pc_packet);
       switch (packet_status)
       {
+        case PC_PACKET_HELLO:
+        {
+          build_mcu_packet(&mcu_packet, OK);
+          send_mcu_packet(&mcu_packet, PACKET_OPT_BLOCK);
+          usci_break();
+          break;
+	}
 #ifdef CONFIG_ENABLE_STORAGE_MODE
         case PC_PACKET_DUMP:
         {
