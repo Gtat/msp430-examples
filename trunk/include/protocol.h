@@ -29,27 +29,30 @@ union __PACK pc_to_mcu
     /* header byte -- little-endian so leftmost bit "dest" is LSB */
     struct __PACK
     {
-      /* 3-bit IDs */
       enum pc_id
-      { 
-        HELLO       = 0x0,
-        DUMP        = 0x1,
-        CAPTURE     = 0x2,
-        HALT        = 0x3,
-        SET_VOLTAGE = 0x4,
-        SET_RATES   = 0x5,
-        SET_MARGIN  = 0x6,
-      } id : 4; 
-      enum pc_flags
-      {
-        NONE
-      } flags : 4; 
+       { 
+        HELLO         = 0x0,
+        DUMP          = 0x1,
+        CAPTURE       = 0x2,
+        HALT          = 0x3,
+        SET_VOLTAGE   = 0x4,
+        SET_RATES     = 0x5,
+        SET_MARGIN    = 0x6,
+        SET_BIAS_TIME = 0x7,
+      } id : 3;
+      uint8_t toggle  : 1;
+      uint8_t channel : 3;
     };
 
     union __PACK
     {
       union dac_word dac_setting;
       uint16_t       taccr;     /* will overwrite TACCR[15:0] */
+      struct
+      {
+        uint8_t  reserved : 1;
+        uint16_t seconds  : 15;
+      }
     } payload;
 
     uint8_t crc;

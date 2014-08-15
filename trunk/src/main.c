@@ -37,12 +37,14 @@ static struct control_t
     STATE_FLUSH,
   } state;
 
-  uint16_t seconds;
+  uint8_t  toggle  : 1;
+  uint16_t seconds : 15;
   volatile uint8_t pc_packets;
   const    uint16_t channels;
 } control = 
   { 
     .state      = STATE_IDLE,
+    .toggle     = 0,
     .seconds    = 0,
     .pc_packets = 0,
     .channels   = NUM_SIGNAL_CHS,

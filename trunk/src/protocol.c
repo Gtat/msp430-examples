@@ -212,8 +212,21 @@ enum pc_packet_status process_pc_packet
 #ifdef CONFIG_ENABLE_DAC_BIASING
     case SET_VOLTAGE:
     {
+#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
+      if (p->command.toggle)
+      {
+        CONFIGURATION.amperometry.hi_volts = p->command.payload.dac_setting;
+      }
+      else
+      {
+        CONFIGURATION.voltages[p->command.payload.dac_setting.formatted.channel] =
+          p->command.payload.dac_setting;
+        CONFIGURATION.amperometry.lo_volts = p->command.payload.dac_setting;
+      }
+#else
       CONFIGURATION.voltages[p->command.payload.dac_setting.formatted.channel] =
         p->command.payload.dac_setting;
+#endif 
       break;
     }
 #endif /* #ifdef CONFIG_ENABLE_DAC_BIASING */
@@ -226,6 +239,20 @@ enum pc_packet_status process_pc_packet
     {
       break;
     }
+#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
+    case SET_BIAS_TIME:
+    {
+      if (p->command.toggle)
+      {
+        CONFIGURATION.amperometry.hi_seconds = p->command.payload.seconds;
+      }
+      else
+      {
+        CONFIGURATION.amperometry.lo_seconds = p->command.payload.seconds;
+      }
+      break;
+    }
+#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
     default:
     {
       return PC_PACKET_EMPTY;
