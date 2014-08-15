@@ -6,19 +6,19 @@
 
 #define DAC_V_REF 2.5
 
-#define FORMAT_DAC_VOLTAGE(ch, volts)                        \
-  {                                                          \
-    .formatted =                                             \
-      {                                                      \
-        .channel = (ch),                                     \
-        .range   = ((volts) >= 1.0),                         \
-        .data    = (uint8_t)(((volts) < 1.0)                 \
+#define FORMAT_DAC_VOLTAGE(ch, volts)                          \
+  {                                                            \
+    .formatted =                                               \
+      {                                                        \
+        .channel = (ch),                                       \
+        .range   = ((volts) >= DAC_V_REF),                     \
+        .data    = (uint8_t)(((volts) < DAC_V_REF)             \
                            ? ((volts) * 256.0 / (DAC_V_REF))   \
                            : ((volts) * 128.0 / (DAC_V_REF))), \
-      },                                                     \
+      },                                                       \
   }
 
-#define SET_DAC_VOLTAGE_ARRAY(ch, volts)       \
+#define SET_DAC_VOLTAGE_ARRAY(ch, volts) \
   [(ch)] = FORMAT_DAC_VOLTAGE(ch, volts)
 
 struct parameter_t parameters =
