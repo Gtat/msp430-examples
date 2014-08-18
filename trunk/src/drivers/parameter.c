@@ -44,10 +44,11 @@ void set_dac_voltage
 {
   usci_write(setting.bytes[0]);
   usci_write(setting.bytes[1]);
-  __bic_SR_register(GIE);
-  usci_commit();
+//  __bic_SR_register(GIE);
+//  usci_commit();
   P2OUT |=  0x01; /* DAC enable line, active high */
-  __bis_SR_register(LPM0_bits | GIE);
+  usci_commit_blocking();
+//  __bis_SR_register(LPM0_bits | GIE);
   P2OUT &= ~0x01;
 }
 

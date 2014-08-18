@@ -50,7 +50,8 @@ static inline void adc_setup
 static inline void adc_setup 
   (const unsigned int channels)
 {
-    /* SET REF VOLTAGES AND CHANNELS */
+  __disable_interrupt();
+  /* SET REF VOLTAGES AND CHANNELS */
   ADC10CTL1 = SHS_1 |                  /* use Timer_A0 */
               CONSEQ_3 |               /* repeat sequence of channels */
               INCH_7;                  /* sequence through all channels */
@@ -63,9 +64,9 @@ static inline void adc_setup
   /* use timer A1_0 for this to avoid an extra ISR */
   TA1CCR0   = 30;                       /* Delay to allow Ref to settle */
   TA1CCTL0 |=  CCIE;
-  __bis_SR_register(LPM0_bits | GIE);  /* low power with interrupts enabled */
-  TA1CCTL0 &= ~CCIE;                    /* disable timer Interrupt */
+  __bis_SR_register(LPM0_bits | GIE);   /* low power with interrupts enabled */
   __disable_interrupt();
+  TA1CCTL0 &= ~CCIE;                    /* disable timer Interrupt */
 
   /* SET TIMER PWM FOR ADC10 TRIGGER! */
   TA0CCTL1 = OUTMOD_3;                  /* When counter == TACCR1, set output. */
@@ -74,6 +75,8 @@ static inline void adc_setup
 
   while (ADC10CTL1 & BUSY);
   ADC10DTC0  = 0;
-  ADC10DTC1  = NUM_TOTAL_CHS; 
+  ADC10DTC1  = NUM_TOTAL_CHS;
+
+  __enable_interrupt();
 }
 

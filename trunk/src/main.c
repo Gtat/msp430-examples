@@ -77,8 +77,6 @@ int main
     {
       case STATE_STREAM:
       {
-        __bis_SR_register(LPM0_bits | GIE); /* enter low power mode 0 */
-                                            /* with interrupts on */
         while (!RING_QUEUE_EMPTY(sample_q))
         {
           build_status = build_mcu_packet(&mcu_packet, DATA, control.seconds);
@@ -118,9 +116,7 @@ int main
 #endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
       default:
       {
-        __bis_SR_register(LPM0_bits | GIE); /* enter low power mode 0 */
-                                            /* with interrupts on */
-        break;
+         break;
       }
     }
 
@@ -174,6 +170,7 @@ int main
       event_type = RING_QUEUE_POP(event_q);
       switch (event_type)
       {
+#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
         case SET_LO_VOLTS:
         {      
           usci_set_mode(USCI_MODE_SPI);
@@ -188,6 +185,7 @@ int main
           usci_set_mode(USCI_MODE_RS232);
           break;
         }
+#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
         default:
         {
           break;

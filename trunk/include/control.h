@@ -30,10 +30,10 @@ struct control_t
     STATE_SETUP,
     STATE_STREAM,
     STATE_FLUSH,
-  } state;
+  } state : 2;
 
-  uint8_t  toggle  : 1;
-  uint16_t seconds : 15;
+  uint8_t           toggle  : 1;
+  int16_t           seconds;
   volatile uint8_t  pc_packets;
   const    uint16_t channels;
 };

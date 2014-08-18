@@ -75,30 +75,25 @@ __interrupt void timer1_a0_isr
 #ifdef CONFIG_ENABLE_DYNAMIC_BIASING
   if (control.toggle)
   {
-    if (control.seconds >= parameters.amperometry.hi_seconds)
+    if (control.seconds <= 0)
     {
-      control.seconds -= parameters.amperometry.hi_seconds;
-      control.toggle   = 0;
+      control.seconds = parameters.amperometry.lo_seconds;
+      control.toggle  = 0;
       RING_QUEUE_PUSH(event_q, SET_LO_VOLTS);
-    }
-    else
-    {
-      ++control.seconds;
+      __bic_SR_register_on_exit(LPM0_bits);
     }
   }
   else
   {
-    if (control.seconds >= parameters.amperometry.lo_seconds)
+    if (control.seconds <= 0)
     {
-      control.seconds -= parameters.amperometry.lo_seconds;
-      control.toggle   = 1;
+      control.seconds = parameters.amperometry.hi_seconds;
+      control.toggle  = 1;
       RING_QUEUE_PUSH(event_q, SET_HI_VOLTS);
-    }
-    else
-    {
-      ++control.seconds;
+      __bic_SR_register_on_exit(LPM0_bits);
     }
   }
+  control.seconds--;
 #endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
-  __bic_SR_register_on_exit(LPM0_bits);
 }
+
