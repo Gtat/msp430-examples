@@ -43,8 +43,8 @@ struct parameter_t parameters =
       {
         .hi_volts = FORMAT_DAC_VOLTAGE(2, 3.2),
         .lo_volts = FORMAT_DAC_VOLTAGE(2, 1),
-        .hi_seconds = 6,
-        .lo_seconds = 10,
+        .hi_seconds = 1,
+        .lo_seconds = 1,
       },
 #endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
   };

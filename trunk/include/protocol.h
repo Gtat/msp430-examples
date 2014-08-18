@@ -52,7 +52,7 @@ union __PACK pc_to_mcu
       {
         uint8_t  reserved : 1;
         uint16_t seconds  : 15;
-      }
+      };
     } payload;
 
     uint8_t crc;

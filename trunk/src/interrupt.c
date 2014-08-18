@@ -73,29 +73,30 @@ __interrupt void timer1_a0_isr
   (void)
 {
 #ifdef CONFIG_ENABLE_DYNAMIC_BIASING
-  ++control.seconds;
   if (control.toggle)
   {
-    if (control.seconds == parameters.amperometry.hi_seconds)
+    if (control.seconds >= parameters.amperometry.hi_seconds)
     {
-      usci_set_mode(USCI_MODE_SPI);
-      set_dac_voltage(parameters.amperometry.lo_volts);
-      usci_set_mode(USCI_MODE_RS232);
-  
-      control.seconds = 0;
-      control.toggle = 0;
+      control.seconds -= parameters.amperometry.hi_seconds;
+      control.toggle   = 0;
+      RING_QUEUE_PUSH(event_q, SET_LO_VOLTS);
+    }
+    else
+    {
+      ++control.seconds;
     }
   }
   else
   {
-    if (control.seconds == parameters.amperometry.lo_seconds)
+    if (control.seconds >= parameters.amperometry.lo_seconds)
     {
-      usci_set_mode(USCI_MODE_SPI);
-      set_dac_voltage(parameters.amperometry.hi_volts);
-      usci_set_mode(USCI_MODE_RS232);
-
-      control.seconds = 0;
-      control.toggle  = 1;
+      control.seconds -= parameters.amperometry.lo_seconds;
+      control.toggle   = 1;
+      RING_QUEUE_PUSH(event_q, SET_HI_VOLTS);
+    }
+    else
+    {
+      ++control.seconds;
     }
   }
 #endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */

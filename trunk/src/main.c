@@ -27,21 +27,7 @@
 #include "drivers/inlines.c"
 #include "ram_symbols.h"
 
-static struct control_t
-{
-  enum state
-  {
-    STATE_IDLE,
-    STATE_SETUP,
-    STATE_STREAM,
-    STATE_FLUSH,
-  } state;
-
-  uint8_t  toggle  : 1;
-  uint16_t seconds : 15;
-  volatile uint8_t pc_packets;
-  const    uint16_t channels;
-} control = 
+struct control_t control = 
   { 
     .state      = STATE_IDLE,
     .toggle     = 0,
@@ -56,6 +42,7 @@ static struct control_t
 RING_QUEUE_CREATE_PREDEFINED(uint8_t,       16, incoming_comm_q);
 RING_QUEUE_CREATE_PREDEFINED(uint8_t,       16, outgoing_comm_q);
 RING_QUEUE_CREATE_PREDEFINED(sample_buffer,  4, sample_q);
+RING_QUEUE_CREATE_PREDEFINED(enum_event,     4, event_q);
 union mcu_to_pc mcu_packet;
 union pc_to_mcu  pc_packet;
 
@@ -63,6 +50,7 @@ int main
   (void)
 {
   enum pc_packet_status packet_status;
+  enum event event_type;
   uint8_t build_status;
 
   setup();                                     /* system setup */
@@ -85,7 +73,7 @@ int main
     /* TX state machine
      * The state cannot change in response to a TXed packet. 
      */
-    switch ((const enum state)control.state)
+    switch ((const enum state_t)control.state)
     {
       case STATE_STREAM:
       {
@@ -161,8 +149,6 @@ int main
 #ifdef CONFIG_ENABLE_DAC_BIASING
           set_all_dac_voltages();
 #endif /* #ifdef CONFIG_ENABLE_DAC_BIASING */
-          build_mcu_packet(&mcu_packet, OK);
-          send_mcu_packet(&mcu_packet, PACKET_OPT_BLOCK);
 
           control.state = STATE_STREAM;
           break;
@@ -177,6 +163,32 @@ int main
           break;
         }
         default: 
+        {
+          break;
+        }
+      }
+    }
+
+    while (!RING_QUEUE_EMPTY(event_q))
+    {
+      event_type = RING_QUEUE_POP(event_q);
+      switch (event_type)
+      {
+        case SET_LO_VOLTS:
+        {      
+          usci_set_mode(USCI_MODE_SPI);
+          set_dac_voltage(parameters.amperometry.lo_volts);
+          usci_set_mode(USCI_MODE_RS232);
+          break;
+        }
+        case SET_HI_VOLTS:
+        {
+          usci_set_mode(USCI_MODE_SPI);
+          set_dac_voltage(parameters.amperometry.hi_volts);
+          usci_set_mode(USCI_MODE_RS232);
+          break;
+        }
+        default:
         {
           break;
         }
