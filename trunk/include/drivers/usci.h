@@ -27,11 +27,14 @@ void usci_set_mode
 
 void usci_write
   (uint8_t c);
+void usci_break
+  (void);
 
 inline void usci_commit
   (void);
 void usci_commit_blocking
   (void);
+
 inline void usci_block_tx
   (void);
 inline void usci_block_rx
