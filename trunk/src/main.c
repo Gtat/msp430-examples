@@ -130,7 +130,7 @@ int main
         {
           build_mcu_packet(&mcu_packet, OK);
           send_mcu_packet(&mcu_packet, PACKET_OPT_BLOCK);
-          usci_break();
+//          usci_break();
           break;
 	}
 #ifdef CONFIG_ENABLE_STORAGE_MODE
@@ -154,7 +154,7 @@ int main
 #ifdef CONFIG_ENABLE_DYNAMIC_BIASING
           amperometry_off();
 #endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
-          usci_break();
+//          usci_break();
           control.state = STATE_IDLE;
           break;
         }
