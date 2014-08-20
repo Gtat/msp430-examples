@@ -130,7 +130,6 @@ int main
         {
           build_mcu_packet(&mcu_packet, OK);
           send_mcu_packet(&mcu_packet, PACKET_OPT_BLOCK);
-//          usci_break();
           break;
 	}
 #ifdef CONFIG_ENABLE_STORAGE_MODE
@@ -154,7 +153,6 @@ int main
 #ifdef CONFIG_ENABLE_DYNAMIC_BIASING
           amperometry_off();
 #endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
-//          usci_break();
           control.state = STATE_IDLE;
           break;
         }
@@ -165,30 +163,33 @@ int main
       }
     }
 
-    while (!RING_QUEUE_EMPTY(event_q))
+    if (control.state == STATE_STREAM)
     {
-      event_type = RING_QUEUE_POP(event_q);
-      switch (event_type)
+      while (!RING_QUEUE_EMPTY(event_q))
       {
-#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
-        case SET_LO_VOLTS:
-        {      
-          usci_set_mode(USCI_MODE_SPI);
-          set_dac_voltage(parameters.amperometry.lo_volts);
-          usci_set_mode(USCI_MODE_RS232);
-          break;
-        }
-        case SET_HI_VOLTS:
+        event_type = RING_QUEUE_POP(event_q);
+        switch (event_type)
         {
-          usci_set_mode(USCI_MODE_SPI);
-          set_dac_voltage(parameters.amperometry.hi_volts);
-          usci_set_mode(USCI_MODE_RS232);
-          break;
-        }
-#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
-        default:
-        {
-          break;
+  #ifdef CONFIG_ENABLE_DYNAMIC_BIASING
+          case SET_LO_VOLTS:
+          {
+            usci_set_mode(USCI_MODE_SPI);
+            set_dac_voltage(parameters.amperometry.lo_volts);
+            usci_set_mode(USCI_MODE_RS232);
+            break;
+          }
+          case SET_HI_VOLTS:
+          {
+            usci_set_mode(USCI_MODE_SPI);
+            set_dac_voltage(parameters.amperometry.hi_volts);
+            usci_set_mode(USCI_MODE_RS232);
+            break;
+          }
+  #endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
+          default:
+          {
+            break;
+          }
         }
       }
     }
