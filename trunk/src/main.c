@@ -30,8 +30,10 @@
 struct control_t control = 
   { 
     .state      = STATE_IDLE,
+#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
     .toggle     = 0,
     .seconds    = 0,
+#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
     .pc_packets = 0,
     .channels   = NUM_SIGNAL_CHS,
   };
@@ -54,9 +56,11 @@ int main
   uint8_t build_status;
 
   setup();                                     /* system setup */
+#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
+  amperometry_off();
+#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
   adc_setup(NUM_SIGNAL_CHS);
   usci_set_mode(USCI_MODE_RS232);
-
 #ifdef CONFIG_ENABLE_STORAGE_MODE
   ram_routine_load();
   if (!parameters.data_record.length)
@@ -143,6 +147,12 @@ int main
         {
 #ifdef CONFIG_ENABLE_DAC_BIASING
           set_all_dac_voltages();
+#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
+          control.toggle  = 0;
+          control.seconds = parameters.amperometry.lo_seconds;
+          set_dynamic_voltage(SET_LO_VOLTS);
+          amperometry_on();
+#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
 #endif /* #ifdef CONFIG_ENABLE_DAC_BIASING */
 
           control.state = STATE_STREAM;
@@ -168,29 +178,9 @@ int main
       while (!RING_QUEUE_EMPTY(event_q))
       {
         event_type = RING_QUEUE_POP(event_q);
-        switch (event_type)
-        {
-  #ifdef CONFIG_ENABLE_DYNAMIC_BIASING
-          case SET_LO_VOLTS:
-          {
-            usci_set_mode(USCI_MODE_SPI);
-            set_dac_voltage(parameters.amperometry.lo_volts);
-            usci_set_mode(USCI_MODE_RS232);
-            break;
-          }
-          case SET_HI_VOLTS:
-          {
-            usci_set_mode(USCI_MODE_SPI);
-            set_dac_voltage(parameters.amperometry.hi_volts);
-            usci_set_mode(USCI_MODE_RS232);
-            break;
-          }
-  #endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
-          default:
-          {
-            break;
-          }
-        }
+#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
+	set_dynamic_voltage(event_type);
+#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
       }
     }
   }

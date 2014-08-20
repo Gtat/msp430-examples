@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "global.h"
+#include "control.h"
 #include "processing.h"
 #include "drivers/flash.h"
 #include "ram_symbols.h"
@@ -75,7 +76,7 @@ void update_rates
 #ifdef CONFIG_ENABLE_DAC_BIASING
 void set_dac_voltage
   (union dac_word setting);
-void set_dac_voltages
+void set_all_dac_voltages
   (void);
 
 #ifdef CONFIG_ENABLE_DYNAMIC_BIASING
