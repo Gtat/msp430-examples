@@ -1,23 +1,7 @@
-/**
- * @file    processing.c
- * @author  Sam Boling <charles.samuel.boling@gmail.com>
- * @version 0.1
- * @date    January - August 2014
- *
- * @section DESCRIPTION
- *
- * Signal processing modules for processing data samples
- * received from the iEGAS sensors.
- *
- */
 #include "processing.h"
 
-/**
- * Constant function.
- * @returns zero.
- */
 inline uint8_t execute_nothing
-  (uint16_t sample, unsigned int ch, struct processor * p)
+  (uint16_t sample, unsigned int ch, struct processor *p)
 {
   return 0;
 }

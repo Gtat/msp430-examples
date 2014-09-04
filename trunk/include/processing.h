@@ -1,15 +1,3 @@
-/**
- * @file    processing.c
- * @author  Sam Boling <charles.samuel.boling@gmail.com>
- * @version 0.1
- * @date    January - August 2014
- *
- * @section DESCRIPTION
- *
- * Signal processing modules for processing data samples
- * received from the iEGAS sensors, and some macros to
- * handle selecting which modules to use.
- */
 #ifndef __PROCESSING_H_GUARD
 #define __PROCESSING_H_GUARD
 

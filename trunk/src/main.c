@@ -2,7 +2,6 @@
  * @file    main.c
  * @author  Sam Boling <charles.samuel.boling@gmail.com>
  * @version 0.1
- * @date    January - August 2014
  *
  * @section DESCRIPTION
  *
