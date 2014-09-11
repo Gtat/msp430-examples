@@ -84,6 +84,8 @@ inline void amperometry_on
   (void);
 void amperometry_off
   (void);
+void set_dynamic_voltage
+  (enum event event_type);
 #endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
 #endif /* #ifdef CONFIG_ENABLE_DAC_BIASING */
 

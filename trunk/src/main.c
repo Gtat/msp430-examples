@@ -88,13 +88,13 @@ int main
 #ifdef CONFIG_ENABLE_STORAGE_MODE
           store_packet(&parameters.data_record, &mcu_packet, 0);
 #endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
-#ifdef CONFIG_ENABLE_ALERTS
           if (build_status)
           {
+#ifdef CONFIG_ENABLE_ALERTS
             build_mcu_packet(&mcu_packet, ALERT, build_status);
             send_mcu_packet(&mcu_packet, PACKET_OPT_BLOCK);
-          }
 #endif /* #ifdef CONFIG_ALERTS_ACTIVE */
+          }
         }
         break;
       }
