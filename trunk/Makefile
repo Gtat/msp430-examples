@@ -14,24 +14,25 @@ SOURCES  = main.c         \
 VPATH    = src/drivers:src
 BUILDDIR = build/
 ASMDIR   = asm
-INCLUDES = -Iinclude 
-LDSCRIPT = -Tlink/msp430.x
+INCLUDES = -Iinclude
+LDSCRIPT = -Tlink/msp430g2553.ld
 ###############################################################################
-CFLAGS   = -mmcu=$(MCU) $(LDSCRIPT) -g -Wall $(INCLUDES) -fshort-enums -Os 
-ASFLAGS  = -mmcu=$(MCU) $(LDSCRIPT) -x assembler-with-cpp -Wa,-gstabs 
-LDFLAGS  = -mmcu=$(MCU) $(LDSCRIPT) -Wl,-Map=$(TARGET).map 
+CFLAGS   = -mmcu=$(MCU) $(LDSCRIPT) -g -Wall $(INCLUDES) -fshort-enums -Os
+ASFLAGS  = -mmcu=$(MCU) $(LDSCRIPT) -x assembler-with-cpp -Wa,-gstabs
+LDFLAGS  = -mmcu=$(MCU) $(LDSCRIPT) -Wl,-Map=$(TARGET).map
 ###############################################################################
-CC       = msp430-gcc
-LD       = msp430-ld
-AR       = msp430-ar
-AS       = msp430-gcc
-GASP     = msp430-gasp
-NM       = msp430-nm
-OBJCOPY  = msp430-objcopy
-RANLIB   = msp430-ranlib
-STRIP    = msp430-strip
-SIZE     = msp430-size
-READELF  = msp430-readelf
+PREFIX   = msp430-elf
+CC       = $(PREFIX)-gcc
+LD       = $(PREFIX)-ld
+AR       = $(PREFIX)-ar
+AS       = $(PREFIX)-gcc
+GASP     = $(PREFIX)-gasp
+NM       = $(PREFIX)-nm
+OBJCOPY  = $(PREFIX)-objcopy
+RANLIB   = $(PREFIX)-ranlib
+STRIP    = $(PREFIX)-strip
+SIZE     = $(PREFIX)-size
+READELF  = $(PREFIX)-readelf
 MAKETXT  = srec_cat
 CP       = cp -p
 RM       = rm -f
@@ -39,7 +40,7 @@ MV       = mv
 ################################################################################
 OBJECTS  = $(SOURCES:.c=.o)
 all: $(TARGET).elf $(TARGET).hex $(TARGET).text Makefile clean
-$(TARGET).elf: $(OBJECTS) 
+$(TARGET).elf: $(OBJECTS)
 	$(CC) $(OBJECTS) $(LDFLAGS) $(LIBS) -o $@
 	$(SIZE) $(TARGET).elf
 
@@ -48,7 +49,7 @@ $(TARGET).elf: $(OBJECTS)
 %.text: %.hex
 	@$(MAKETXT) -O $@ -TITXT $< -I
 	@unix2dos $(TARGET).text
-#  The above line is required for the DOS based TI BSL tool to be able to read 
+#  The above line is required for the DOS based TI BSL tool to be able to read
 #  the txt file generated from linux/unix systems.
 
 %.o: %.c
@@ -67,4 +68,3 @@ clean:
 #	@$(RM) $(TARGET).*
 #	@$(RM) $(SOURCES:.c=.lst)
 	@$(RM) $(DEPEND)
-
