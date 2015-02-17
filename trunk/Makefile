@@ -1,9 +1,8 @@
-TARGET     = iegas
+TARGET     = example
 MCU        = msp430g2553
 
 SOURCES  = main.c         \
            utility.c      \
-           adc.c          \
            flash.c        \
            usci.c         \
            protocol.c     \

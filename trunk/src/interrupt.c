@@ -32,6 +32,9 @@ void __attribute__(( interrupt(USCIAB0TX_VECTOR) )) usci_tx_isr
 void __attribute__(( interrupt(USCIAB0RX_VECTOR) )) usci_rx_isr
   (void)
 {
+  P1OUT ^= 0x01;
+  (volatile char)UCA0RXBUF;
+#if 0
   if (UCA0CTL0 & UCSYNC) /* SPI mode */
   {
     (volatile char)UCA0RXBUF; /* dummy read to clear interrupt */
@@ -49,6 +52,7 @@ void __attribute__(( interrupt(USCIAB0RX_VECTOR) )) usci_rx_isr
       __bic_SR_register_on_exit(LPM0_bits);
     }
   }
+#endif
 }
 
 /**
@@ -60,35 +64,24 @@ void __attribute__(( interrupt(USCIAB0RX_VECTOR) )) usci_rx_isr
 void __attribute__(( interrupt(ADC10_VECTOR) )) adc_isr
   (void)
 {
+/* add these back, along with appropriate ring queue,
+ * if you want ADC functionality
+ */
+/*
   RING_QUEUE_PUSH_NO_DATA(sample_q);
   ADC10SA = (uint16_t)&sample_q.data[sample_q.head];
+*/
   __bic_SR_register_on_exit(LPM0_bits);
 }
 
 void __attribute__(( interrupt(TIMER1_A0_VECTOR) )) timer1_a0_isr
   (void)
 {
-#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
-  if (control.toggle)
+  if (control.seconds <= 0)
   {
-    if (control.seconds <= 0)
-    {
-      control.seconds = parameters.amperometry.lo_seconds;
-      control.toggle  = 0;
-      RING_QUEUE_PUSH(event_q, SET_LO_VOLTS);
-      __bic_SR_register_on_exit(LPM0_bits);
-    }
-  }
-  else
-  {
-    if (control.seconds <= 0)
-    {
-      control.seconds = parameters.amperometry.hi_seconds;
-      control.toggle  = 1;
-      RING_QUEUE_PUSH(event_q, SET_HI_VOLTS);
-      __bic_SR_register_on_exit(LPM0_bits);
-    }
+    control.seconds = control.interval;
+    RING_QUEUE_PUSH(event_q, SET_LO_VOLTS);
+    __bic_SR_register_on_exit(LPM0_bits);
   }
   control.seconds--;
-#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
 }

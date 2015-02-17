@@ -5,12 +5,7 @@
  *
  * @section DESCRIPTION
  *
- * The Intelligent Electrochemical Gas Analysis System's microcontroller
- * software platform. The software is interrupt-driven, so this file only
- * performs setup of peripherals and data structures, then falls into a
- * state machine loop. It sleeps between iterations of the state machine
- * and only wakes up to construct outgoing packets or parse incoming packets
- * for configuration information.
+ * Simple MSP430 examples to send a "hello" message to the PC.
  */
 
 #include <stdio.h>
@@ -19,23 +14,13 @@
 #include "ringq.h"
 
 #include "protocol.h"
-#include "drivers/flash.h"
-#include "drivers/parameter.h"
 #include "drivers/usci.h"
-#include "processing.h"
 
 #include "drivers/inlines.c"
-#include "ram_symbols.h"
 
-struct control_t control = 
-  { 
-    .state      = STATE_IDLE,
-#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
-    .toggle     = 0,
-    .seconds    = 0,
-#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
-    .pc_packets = 0,
-    .channels   = NUM_SIGNAL_CHS,
+struct control_t control =
+  {
+    .interval = 3, /* send a msg every 3 seconds */
   };
 
 /* declare and initialize a ring queue AKA circular buffer AKA fifo */
@@ -43,150 +28,41 @@ struct control_t control =
 /* declare it globally so it is shared between main and interrupt */
 RING_QUEUE_CREATE_PREDEFINED(uint8_t,       16, incoming_comm_q);
 RING_QUEUE_CREATE_PREDEFINED(uint8_t,       16, outgoing_comm_q);
-RING_QUEUE_CREATE_PREDEFINED(sample_buffer,  4, sample_q);
 RING_QUEUE_CREATE_PREDEFINED(enum_event,     4, event_q);
-union mcu_to_pc mcu_packet;
-union pc_to_mcu  pc_packet;
+RING_QUEUE_CREATE_PREDEFINED(sample_buffer,  4, sample_q);
+
+char hello_message[] = "hello\n";
 
 int main
   (void)
 {
-  enum pc_packet_status packet_status;
-  enum event event_type;
-  uint8_t build_status;
+  uint8_t i;
 
-  setup();                                     /* system setup */
-#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
-  amperometry_off();
-#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
-  adc_setup(NUM_SIGNAL_CHS);
+  setup();                         /* system setup */
   usci_set_mode(USCI_MODE_RS232);
-#ifdef CONFIG_ENABLE_STORAGE_MODE
-  ram_routine_load();
-  if (!parameters.data_record.length)
-  {
-    flash_record_init
-      (&parameters.data_record,   
-       (uint8_t *)&stored_data,
-       sizeof(stored_data));
-  }
-#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
 
+  P1DIR = 0x01;
+  P1OUT = 0x00;
+
+  __bis_SR_register(GIE);
+  while(1);
+  /*
   while(1)
   {
-    /* TX state machine
-     * The state cannot change in response to a TXed packet. 
-     */
-    switch ((const enum state_t)control.state)
+    while (!RING_QUEUE_EMPTY(event_q))
     {
-      case STATE_STREAM:
+      RING_QUEUE_POP(event_q);
+      for (i=0; i < sizeof(hello_message); ++i)
       {
-        while (!RING_QUEUE_EMPTY(sample_q))
-        {
-          build_status = build_mcu_packet(&mcu_packet, DATA, control.seconds);
-          send_mcu_packet(&mcu_packet, PACKET_OPT_NONE);
-#ifdef CONFIG_ENABLE_STORAGE_MODE
-          store_packet(&parameters.data_record, &mcu_packet, 0);
-#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
-          if (build_status)
-          {
-#ifdef CONFIG_ENABLE_ALERTS
-            build_mcu_packet(&mcu_packet, ALERT, build_status);
-            send_mcu_packet(&mcu_packet, PACKET_OPT_BLOCK);
-#endif /* #ifdef CONFIG_ALERTS_ACTIVE */
-          }
-        }
-        break;
+        usci_write(hello_message[i]);
       }
-#ifdef CONFIG_ENABLE_STORAGE_MODE
-      case STATE_FLUSH:
-      {
-        build_mcu_packet(&mcu_packet, PREAMBLE);
-        send_mcu_packet(&mcu_packet, PACKET_OPT_BLOCK);
-
-        while (build_mcu_packet(&mcu_packet, 
-                                STORED, 
-                                &parameters.data_record) > 0)
-        {
-          send_mcu_packet(&mcu_packet, PACKET_OPT_BLOCK);
-        }
-
-        build_mcu_packet(&mcu_packet, OK);
-        send_mcu_packet(&mcu_packet, PACKET_OPT_BLOCK);
-
-        control.state = STATE_IDLE;
-        break;
-      }
-#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
-      default:
-      {
-         break;
-      }
+      usci_commit();
     }
-
-    /* RX state machine */
-    for ( ; control.pc_packets > 0; --control.pc_packets)
-    {
-      packet_status = process_pc_packet(&pc_packet);
-      switch (packet_status)
-      {
-        case PC_PACKET_HELLO:
-        {
-          build_mcu_packet(&mcu_packet, OK);
-          send_mcu_packet(&mcu_packet, PACKET_OPT_BLOCK);
-          break;
-	}
-#ifdef CONFIG_ENABLE_STORAGE_MODE
-        case PC_PACKET_DUMP:
-        {
-          control.state = STATE_FLUSH;
-          break;
-        }
-#endif /* #ifdef CONFIG_ENABLE_STORAGE_MODE */
-        case PC_PACKET_BEGIN:
-        {
-#ifdef CONFIG_ENABLE_DAC_BIASING
-          set_all_dac_voltages();
-#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
-          control.toggle  = 0;
-          control.seconds = parameters.amperometry.lo_seconds;
-          set_dynamic_voltage(SET_LO_VOLTS);
-          amperometry_on();
-#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
-#endif /* #ifdef CONFIG_ENABLE_DAC_BIASING */
-
-          control.state = STATE_STREAM;
-          break;
-        }
-        case PC_PACKET_HALT:
-        {
-#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
-          amperometry_off();
-#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
-          control.state = STATE_IDLE;
-          break;
-        }
-        default: 
-        {
-          break;
-        }
-      }
-    }
-
-    if (control.state == STATE_STREAM)
-    {
-      while (!RING_QUEUE_EMPTY(event_q))
-      {
-        event_type = RING_QUEUE_POP(event_q);
-#ifdef CONFIG_ENABLE_DYNAMIC_BIASING
-	set_dynamic_voltage(event_type);
-#endif /* #ifdef CONFIG_ENABLE_DYNAMIC_BIASING */
-      }
-    }
+    __bis_SR_register(LPM0_bits | GIE);
   }
+  */
 
   return 0;
 }
 
 #include "interrupt.c"
-

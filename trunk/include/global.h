@@ -21,7 +21,7 @@
 
 RING_QUEUE_DECLARE_GLOBAL(uint8_t,       16, incoming_comm_q);
 RING_QUEUE_DECLARE_GLOBAL(uint8_t,       16, outgoing_comm_q);
-RING_QUEUE_DECLARE_GLOBAL(sample_buffer,  4, sample_q);
 RING_QUEUE_DECLARE_GLOBAL(enum event,     4, event_q);
+RING_QUEUE_DECLARE_GLOBAL(sample_buffer,  4, sample_q);
 
 #endif /* __GLOBAL_H_GUARD */

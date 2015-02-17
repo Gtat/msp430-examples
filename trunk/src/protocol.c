@@ -202,12 +202,10 @@ enum pc_packet_status process_pc_packet
     }
     case CAPTURE:
     {
-      adc_on();
       return PC_PACKET_BEGIN;
     }
     case HALT:
     {
-      adc_off();
       return PC_PACKET_HALT;
     }
 #ifdef CONFIG_ENABLE_DAC_BIASING

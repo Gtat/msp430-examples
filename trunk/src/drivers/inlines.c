@@ -13,7 +13,7 @@ static inline void setup
   if (CALBC1_1MHZ == 0xFF)
   {
     while(1);               /* trap CPU if clock is not calibrated */
-  } 
+  }
   BCSCTL1 = CALBC1_1MHZ;
   DCOCTL  = CALDCO_1MHZ;
 
@@ -24,7 +24,7 @@ static inline void setup
 
 /**
  * Set up both timers to use the real-time clock.
- * Both are in UP mode. 
+ * Both are in UP mode.
  */
 static inline void timer_setup
   (void)
@@ -34,20 +34,20 @@ static inline void timer_setup
   (void)
 {
   BCSCTL3  = XCAP_3;  /* oscillator capacitance == 12.5 pF */
-  TA1CTL   = TA0CTL = TASSEL_1 | 
+  TA1CTL   = TA0CTL = TASSEL_1 |
                       MC_1;
   TA1CCTL1 = OUTMOD_1;
 }
 /**
- * Initial ADC configuration. 
+ * Initial ADC configuration.
  *
  * @param channels  The number of channels to sample.
  */
-static inline void adc_setup 
+static inline void adc_setup
   (const unsigned int channels)
   __attribute__((always_inline));
 
-static inline void adc_setup 
+static inline void adc_setup
   (const unsigned int channels)
 {
   __disable_interrupt();
@@ -71,7 +71,8 @@ static inline void adc_setup
   /* SET TIMER PWM FOR ADC10 TRIGGER! */
   TA0CCTL1 = OUTMOD_3;                  /* When counter == TACCR1, set output. */
                                         /* When counter == TACCR0, clear output. */
-  update_rates(RATE_FLAGS_ADC, 0x8000 / channels);
+  /* Needed to set the ADC scan rate */
+//  update_rates(RATE_FLAGS_ADC, 0x8000 / channels);
 
   while (ADC10CTL1 & BUSY);
   ADC10DTC0  = 0;
@@ -79,4 +80,3 @@ static inline void adc_setup
 
   __enable_interrupt();
 }
-

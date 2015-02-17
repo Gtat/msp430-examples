@@ -9,7 +9,7 @@
  *
  * The USCI is a subsystem on the microcontroller for managing several
  * kinds of serial interfaces. The ones of interest to the iEGAS are
- * the SPI bus and the UART/serial/RS232 protocol that communicates 
+ * the SPI bus and the UART/serial/RS232 protocol that communicates
  * over the USB. This file contains some management code for both of
  * them.
  *
@@ -42,24 +42,23 @@ void usci_set_mode
   {
     case USCI_MODE_SPI:
     {
-      UCA0CTL0 |= UCMSB | UCMST | UCSYNC; 
+      UCA0CTL0 |= UCMSB | UCMST | UCSYNC;
       UCA0BR0   = SPI_BAUDRATE_REGVAL;
       UCA0BR1   = 0;
-      UCA0MCTL  = 0;  
+      UCA0MCTL  = 0;
       break;
     }
     case USCI_MODE_RS232:
     {
       UCA0BR0   =  UART_BAUDRATE_REGVAL;
-      UCA0CTL0 &= ~(UCMSB | UCMST | UCSYNC); 
+      UCA0CTL0 &= ~(UCMSB | UCMST | UCSYNC);
       UCA0MCTL  =  UCBRS2 | UCBRS0;     /* RS232 modulation pattern, UG 19-30 */
       break;
     }
     default:
     {
-      P1SEL  &= ~(BIT1 | BIT2 | BIT4); 
-      P1SEL2 &= ~(BIT1 | BIT2 | BIT4); 
-      adc_on();
+      P1SEL  &= ~(BIT1 | BIT2 | BIT4);
+      P1SEL2 &= ~(BIT1 | BIT2 | BIT4);
       return; /* don't turn interrupts back on, hold in reset */
     }
   }
@@ -69,7 +68,7 @@ void usci_set_mode
 }
 
 /**
- * Add a byte to the outgoing data queue. No data will be written until 
+ * Add a byte to the outgoing data queue. No data will be written until
  * usci_commit() is called.
  *
  * @param c  The byte to write out.
@@ -116,4 +115,3 @@ __attribute__((always_inline)) inline void usci_break
   RING_QUEUE_PUSH(outgoing_comm_q, 0x55);
   usci_commit_blocking();
 }
-

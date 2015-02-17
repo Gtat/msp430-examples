@@ -2,7 +2,7 @@
 #define __CONTROL_H_GUARD
 
 /** \union word
- *  Data type for prettying up bytewise accesses to an object of 
+ *  Data type for prettying up bytewise accesses to an object of
  *  native word size.
  */
 union word
@@ -24,19 +24,9 @@ enum event
 
 struct control_t
 {
-  enum state_t
-  {
-    STATE_IDLE,
-    STATE_SETUP,
-    STATE_STREAM,
-    STATE_FLUSH,
-  } state : 2;
-
-  uint8_t           toggle  : 1;
-  int16_t           seconds;
-  volatile uint8_t  pc_packets;
-  const    uint16_t channels;
+  uint16_t seconds;
+  uint16_t interval;
+  uint8_t  pc_packets;
 };
 
 #endif /* #ifndef __CONTROL_H_GUARD */
-
